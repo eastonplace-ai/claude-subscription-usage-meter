@@ -1,0 +1,29 @@
+{
+  "_comment": "Add these hooks to ~/.claude/settings.json under the 'hooks' key",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /path/to/your/fetch-live-usage.js",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /path/to/your/turn-logger.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

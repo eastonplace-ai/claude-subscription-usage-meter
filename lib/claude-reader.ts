@@ -113,15 +113,18 @@ function stripMarkdown(s: string): string {
 }
 
 // Per-token cost in USD per million tokens [input, output, cacheWrite, cacheRead]
+// ASSUMPTIONS: Cache reads use blended $1/MTok (mix of Opus $1.50 + Sonnet $0.30).
+// Output uses model-specific rates. Actual costs vary by session model mix.
+// Claude Max subscription = flat monthly fee; these are API-equivalent estimates.
 export const CLAUDE_PRICING: Record<string, [number, number, number, number]> = {
-  'claude-opus-4-6':           [15.00, 75.00, 18.75, 1.50],
-  'claude-sonnet-4-6':         [ 3.00, 15.00,  3.75, 0.30],
-  'claude-haiku-4-5-20251001': [ 0.80,  4.00,  1.00, 0.08],
-  'claude-haiku-4-5':          [ 0.80,  4.00,  1.00, 0.08],
+  'claude-opus-4-6':           [15.00, 75.00, 18.75, 1.00],
+  'claude-sonnet-4-6':         [ 3.00, 15.00,  3.75, 1.00],
+  'claude-haiku-4-5-20251001': [ 0.80,  4.00,  1.00, 1.00],
+  'claude-haiku-4-5':          [ 0.80,  4.00,  1.00, 1.00],
   // legacy keyword fallbacks
-  opus:   [15.00, 75.00, 18.75, 1.50],
-  sonnet: [ 3.00, 15.00,  3.75, 0.30],
-  haiku:  [ 0.80,  4.00,  1.00, 0.08],
+  opus:   [15.00, 75.00, 18.75, 1.00],
+  sonnet: [ 3.00, 15.00,  3.75, 1.00],
+  haiku:  [ 0.80,  4.00,  1.00, 1.00],
 };
 
 function modelPricing(model: string): [number, number, number, number] {
@@ -132,9 +135,13 @@ function modelPricing(model: string): [number, number, number, number] {
   return CLAUDE_PRICING['sonnet']; // sonnet default
 }
 
-function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
-  const [inputRate, outputRate] = modelPricing(model);
-  return (inputTokens * inputRate + outputTokens * outputRate) / 1_000_000;
+function estimateCost(model: string, inputTokens: number, outputTokens: number, cacheWriteTokens: number = 0, cacheReadTokens: number = 0): number {
+  const [inputRate, outputRate, cacheWriteRate, cacheReadRate] = modelPricing(model);
+  return (inputTokens * inputRate + outputTokens * outputRate + cacheWriteTokens * cacheWriteRate + cacheReadTokens * cacheReadRate) / 1_000_000;
+}
+
+export function computeEntryCost(entry: { model: string; input_tokens: number; output_tokens: number; cached_tokens?: number; cache_write_tokens?: number }): number {
+  return estimateCost(entry.model, entry.input_tokens ?? 0, entry.output_tokens ?? 0, entry.cache_write_tokens ?? 0, entry.cached_tokens ?? 0);
 }
 
 function computeIncrementalCost(
@@ -419,16 +426,15 @@ async function parseSessionFile(
 
       const model: string = msg.model ?? '';
       const usage = msg.usage ?? {};
-      const inputTokens: number =
-        (usage.input_tokens ?? 0) +
-        (usage.cache_creation_input_tokens ?? 0) +
-        (usage.cache_read_input_tokens ?? 0);
+      const inputTokens: number = usage.input_tokens ?? 0;
+      const cacheWriteTokens: number = usage.cache_creation_input_tokens ?? 0;
+      const cacheReadTokens: number = usage.cache_read_input_tokens ?? 0;
       const outputTokens: number = usage.output_tokens ?? 0;
-      const totalTurn = inputTokens + outputTokens;
+      const totalTurn = inputTokens + cacheWriteTokens + cacheReadTokens + outputTokens;
 
       if (totalTurn > 0 && model) {
         acc.totalTokens += totalTurn;
-        acc.totalCost += estimateCost(model, inputTokens, outputTokens);
+        acc.totalCost += estimateCost(model, inputTokens, outputTokens, cacheWriteTokens, cacheReadTokens);
         acc.modelUsage[model] = (acc.modelUsage[model] ?? 0) + totalTurn;
       }
 
@@ -580,13 +586,12 @@ export async function getProjectSessions(projectSlug: string): Promise<ProjectSe
         const model: string = msg.model ?? '';
         if (model) lastModel = model;
         const usage = msg.usage ?? {};
-        const inputTokens =
-          (usage.input_tokens ?? 0) +
-          (usage.cache_creation_input_tokens ?? 0) +
-          (usage.cache_read_input_tokens ?? 0);
+        const inputTokens = usage.input_tokens ?? 0;
+        const cacheWriteTokens = usage.cache_creation_input_tokens ?? 0;
+        const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
         const outputTokens: number = usage.output_tokens ?? 0;
-        totalTokens += inputTokens + outputTokens;
-        totalCost += estimateCost(model, inputTokens, outputTokens);
+        totalTokens += inputTokens + cacheWriteTokens + cacheReadTokens + outputTokens;
+        totalCost += estimateCost(model, inputTokens, outputTokens, cacheWriteTokens, cacheReadTokens);
 
         const content: any[] = msg.content ?? [];
         for (const block of content) {

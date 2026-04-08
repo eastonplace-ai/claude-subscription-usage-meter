@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,12 +46,12 @@ const HOOK_DESCRIPTIONS: Record<string, string> = {
 
 // ── Per-script descriptions (replaces generic "Runs a Node.js script: X.js") ──
 const SCRIPT_DESCRIPTIONS: Record<string, string> = {
-  'obsidian-session-start.js': 'Loads your Obsidian vault into context — reads your identity profile (Easton.md), the active WIP file, and the vault index. Injects up to ~2KB of structured context so Claude knows your projects, preferences, and current blockers without you re-explaining. Also logs a session-start event to Supabase with your current rate limit usage.',
+  'obsidian-session-start.js': 'Loads your Obsidian vault into context — reads your identity profile, the active WIP file, and the vault index. Injects up to ~2KB of structured context so Claude knows your projects, preferences, and current blockers without you re-explaining. Also logs a session-start event to Supabase with your current rate limit usage.',
   'obsidian-turn-lookup.js': 'Fires on every message. Keyword-matches your prompt to vault notes (e.g. "dashboard" → dashboard.md), traverses wikilinks up to 2 hops deep, and injects the most relevant snippets as context. Also runs a Khoj semantic search for anything not caught by keywords. Logs injection size to Supabase. Target: under 80ms.',
   'obsidian-turn-noter.js': 'Fires on every message. Tracks turn count and every 4 turns appends a timestamped note to your daily session log in the vault (ops/sessions/YYYY-MM-DD.md). Creates a running breadcrumb trail of what you worked on during the session. Also logs the event to Supabase. Target: under 30ms.',
   'obsidian-precompact.js': 'Fires just before context compaction. Reads the last 200 lines of the session transcript, extracts what you were working on and which tools ran, and writes a structured snapshot to the vault. Also overwrites active.md with your current state so the very next session start picks it up immediately.',
   'pm-report-hook.js': 'Fires on every message. Every 10 turns it generates a Sprint Report (via Haiku) covering what shipped, what got worse, token spend, and action backlog — saved to the vault and pinged to Telegram. Every 50 turns it generates a full Sprint Retrospective instead. Also runs vault maintenance: adds missing descriptions to notes and flags orphaned pages.',
-  'keyword-router.js': 'Fires on every message. Pattern-matches your prompt against keywords (f1, dashboard, jarvis, etc.) and injects a routing tag so the parent agent knows which sub-agent (Enzo, Bento, Jarvis) should handle the request.',
+  'keyword-router.js': 'Fires on every message. Pattern-matches your prompt against configured keywords and injects a routing tag so the parent agent knows which sub-agent should handle the request.',
   'fetch-live-usage.js': 'Utility called by other hooks — not a hook itself. Reads your current Claude rate limit usage (5-hour and 7-day windows) from Supabase and returns the percentages so they get attached to every log entry.',
 };
 
@@ -284,9 +284,9 @@ const WORKFLOW_CONFIG = {
     { role: 'Sub-agents (research)', effort: 'high', desc: 'Haiku — reading, research, querying. On any task: lay out todo list, delegate each item, QA output, send back with specific fixes.' },
   ],
   agentTeam: [
-    { name: 'Jarvis', model: 'haiku-4.5', effort: 'high', role: 'Task tracking, reports, executive assistant' },
-    { name: 'Enzo', model: 'sonnet-4.6', effort: 'medium', role: 'GridIntel / F1 data analysis' },
-    { name: 'Bento', model: 'sonnet-4.6', effort: 'medium', role: 'Easton Dashboard (Next.js, Supabase, Vercel)' },
+    { name: 'Agent 1', model: 'haiku-4.5', effort: 'high', role: 'Configured in .claude/agents/' },
+    { name: 'Agent 2', model: 'sonnet-4.6', effort: 'medium', role: 'Configured in .claude/agents/' },
+    { name: 'Agent 3', model: 'sonnet-4.6', effort: 'medium', role: 'Configured in .claude/agents/' },
   ],
   workflowRules: [
     'Work tasks end-to-end in one pass.',
@@ -407,19 +407,196 @@ function WorkflowConfigSection() {
   );
 }
 
+// ── Menubar Settings Types ─────────────────────────────────────────────────────
+
+interface MenubarSettings {
+  enabled: boolean;
+  showInMenubar: boolean;
+  showFiveHour: boolean;
+  showSevenDay: boolean;
+  showSonnet: boolean;
+  showCost: boolean;
+  refreshInterval: number;
+}
+
+const MENUBAR_DEFAULTS: MenubarSettings = {
+  enabled: true,
+  showInMenubar: true,
+  showFiveHour: true,
+  showSevenDay: true,
+  showSonnet: true,
+  showCost: true,
+  refreshInterval: 60,
+};
+
+// ── Menubar Settings Section ───────────────────────────────────────────────────
+
+function MenubarSettingsSection({
+  settings,
+  onSave,
+  saving,
+}: {
+  settings: MenubarSettings;
+  onSave: (next: MenubarSettings) => void;
+  saving: boolean;
+}) {
+  const toggle = (key: keyof MenubarSettings) => {
+    onSave({ ...settings, [key]: !settings[key] });
+  };
+
+  const setRefresh = (val: number) => {
+    onSave({ ...settings, refreshInterval: val });
+  };
+
+  const ToggleRow = ({
+    label,
+    description,
+    field,
+    disabled,
+  }: {
+    label: string;
+    description?: string;
+    field: keyof MenubarSettings;
+    disabled?: boolean;
+  }) => {
+    const checked = !!settings[field];
+    return (
+      <div
+        className={`flex items-center justify-between px-4 py-2.5 border-b border-nothing-border last:border-b-0 transition-colors ${disabled ? 'opacity-40' : 'hover:bg-nothing-surface2/40'}`}
+      >
+        <div className="flex flex-col gap-0.5">
+          <span className="font-mono text-[10px] text-nothing-text">{label}</span>
+          {description && (
+            <span className="font-mono text-[8px] text-nothing-text-dim">{description}</span>
+          )}
+        </div>
+        <button
+          disabled={disabled}
+          onClick={() => !disabled && toggle(field)}
+          className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border transition-colors duration-150 focus:outline-none ${
+            checked
+              ? 'bg-nothing-green border-nothing-green/60'
+              : 'bg-nothing-surface2 border-nothing-border2'
+          } ${disabled ? 'cursor-not-allowed' : ''}`}
+          aria-checked={checked}
+          role="switch"
+        >
+          <span
+            className={`inline-block h-3 w-3 rounded-full bg-nothing-text shadow-sm transform transition-transform duration-150 mt-0.5 ${
+              checked ? 'translate-x-4' : 'translate-x-0.5'
+            }`}
+          />
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Menu Bar Widget</CardTitle>
+        <div className="flex items-center gap-2">
+          <Badge variant={settings.enabled ? 'live' : 'estimated'}>
+            {settings.enabled ? 'ENABLED' : 'DISABLED'}
+          </Badge>
+          {saving && (
+            <span className="font-mono text-[8px] uppercase tracking-wider text-nothing-text-dim animate-pulse">
+              saving…
+            </span>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ToggleRow
+          label="Enable Menu Bar"
+          description="Master toggle — shows or hides the menu bar widget entirely"
+          field="enabled"
+        />
+        <ToggleRow
+          label="Show 5-Hour Usage"
+          description="Display current 5-hour rate limit window"
+          field="showFiveHour"
+          disabled={!settings.enabled}
+        />
+        <ToggleRow
+          label="Show 7-Day Usage"
+          description="Display rolling 7-day usage percentage"
+          field="showSevenDay"
+          disabled={!settings.enabled}
+        />
+        <ToggleRow
+          label="Show Sonnet Weekly"
+          description="Display Sonnet-specific weekly token count"
+          field="showSonnet"
+          disabled={!settings.enabled}
+        />
+        <ToggleRow
+          label="Show Today's Cost"
+          description="Display estimated spend for the current day"
+          field="showCost"
+          disabled={!settings.enabled}
+        />
+
+        {/* Refresh interval */}
+        <div
+          className={`flex items-center justify-between px-4 py-3 transition-colors ${!settings.enabled ? 'opacity-40' : 'hover:bg-nothing-surface2/40'}`}
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] text-nothing-text">Refresh Interval</span>
+            <span className="font-mono text-[8px] text-nothing-text-dim">
+              How often the widget polls for new data
+            </span>
+          </div>
+          <select
+            disabled={!settings.enabled}
+            value={settings.refreshInterval}
+            onChange={(e) => setRefresh(Number(e.target.value))}
+            className="font-mono text-[10px] text-nothing-text bg-nothing-surface2 border border-nothing-border rounded-nothing px-2 py-1 focus:outline-none focus:border-nothing-border2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <option value={30}>30s</option>
+            <option value={60}>60s</option>
+            <option value={120}>120s</option>
+            <option value={300}>300s</option>
+          </select>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [menubarSettings, setMenubarSettings] = useState<MenubarSettings>(MENUBAR_DEFAULTS);
+  const [menubarSaving, setMenubarSaving] = useState(false);
+
+  const saveMenubarSettings = useCallback(async (next: MenubarSettings) => {
+    setMenubarSettings(next);
+    setMenubarSaving(true);
+    try {
+      await fetch('/api/menubar-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+    } catch (e) {
+      console.error('Failed to save menubar settings', e);
+    } finally {
+      setMenubarSaving(false);
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/settings');
-        if (res.ok) {
-          setSettings(await res.json());
-        }
+        const [settingsRes, menubarRes] = await Promise.all([
+          fetch('/api/settings'),
+          fetch('/api/menubar-settings'),
+        ]);
+        if (settingsRes.ok) setSettings(await settingsRes.json());
+        if (menubarRes.ok) setMenubarSettings(await menubarRes.json());
       } catch (e) {
         console.error('Failed to fetch settings', e);
       } finally {
@@ -511,6 +688,15 @@ export default function SettingsPage() {
             </p>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Menu Bar Widget */}
+      <motion.div variants={fadeUp}>
+        <MenubarSettingsSection
+          settings={menubarSettings}
+          onSave={saveMenubarSettings}
+          saving={menubarSaving}
+        />
       </motion.div>
 
       {/* Model section */}

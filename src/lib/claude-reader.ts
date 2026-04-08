@@ -34,10 +34,7 @@ export function computeEntryCost(entry: {
 
 const HOME = os.homedir();
 const CLAUDE_DIR = path.join(HOME, '.claude');
-const TOKEN_LOG = path.join(
-  HOME,
-  'Library/Mobile Documents/com~apple~CloudDocs/Vibe Coding Projects/.claude/agents/token-log.jsonl'
-);
+const TOKEN_LOG = process.env.TOKEN_LOG_PATH || path.join(HOME, '.claude', 'agents', 'token-log.jsonl');
 
 // Helper: parse a JSONL file, returning an array of parsed objects
 function parseJsonl(filePath: string): any[] {
@@ -379,17 +376,11 @@ export async function getLiveUsage(): Promise<{
   updated_at?: string;
   source?: string;
 } | null> {
-  // Try Supabase cache first (same approach as pm-report-hook.js)
+  // Try Supabase cache first (env vars must be set)
   try {
-    const envPath = path.join(
-      HOME,
-      'Library/Mobile Documents/com~apple~CloudDocs/Vibe Coding Projects/projects/easton-dashboard-6/.env.local'
-    );
-    const env = fs.readFileSync(envPath, 'utf8');
-    const supabaseUrl = 'https://zxgklsqntmshsevyrurh.supabase.co';
-    const keyMatch = env.match(/^SUPABASE_SERVICE_ROLE_KEY=(.+)$/m);
-    const key = keyMatch?.[1]?.trim();
-    if (key) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseUrl && key) {
       const out = execSync(
         `curl -s "${supabaseUrl}/rest/v1/claude_usage_cache?id=eq.1&select=five_hour_utilization,seven_day_utilization,seven_day_sonnet_utilization,updated_at" ` +
           `-H "apikey: ${key}" -H "Authorization: Bearer ${key}"`,

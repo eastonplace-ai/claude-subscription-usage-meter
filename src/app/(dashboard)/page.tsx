@@ -5,6 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
+  ComposedChart,
+  Line,
   PieChart,
   Pie,
   Cell,
@@ -41,6 +45,7 @@ interface LiveUsage {
   tokenBudget?: {
     fiveHour: TokenBudgetWindow;
     sevenDay: TokenBudgetWindow;
+    sonnet?: TokenBudgetWindow;
   };
 }
 
@@ -184,10 +189,11 @@ function agentColor(name: string): string {
 
 // ── Skeleton ───────────────────────────────────────────────────────────────────
 
-function Skeleton({ className = '' }: { className?: string }) {
+function Skeleton({ className = '', style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <div
       className={`rounded-nothing bg-nothing-surface2 animate-pulse ${className}`}
+      style={style}
     />
   );
 }
@@ -207,6 +213,7 @@ function RateLimitPanel({
   resetsAt,
   overagePct,
   budget,
+  sonnetBudget,
   delay,
 }: {
   label: string;
@@ -214,6 +221,7 @@ function RateLimitPanel({
   resetsAt: string;
   overagePct?: number;
   budget?: TokenBudgetWindow;
+  sonnetBudget?: TokenBudgetWindow;
   delay?: number;
 }) {
   const [countdown, setCountdown] = useState(formatCountdown(resetsAt));
@@ -270,17 +278,33 @@ function RateLimitPanel({
           </div>
         )}
 
-        {/* Overage sub-bar */}
+        {/* Sonnet sub-bar */}
         {overagePct !== undefined && (
           <div className="mt-4">
             <ProgressBar
               value={overagePct}
-              size="sm"
+              size="lg"
               variant="blue"
-              label="SONNET WEEKLY"
+              label={`SONNET WEEKLY — ${overagePct}%`}
               showLabel
               delay={0.2}
             />
+            {sonnetBudget && sonnetBudget.budget > 0 && (
+              <div className="mt-1.5 flex items-center gap-4 font-mono text-[10px] tracking-wider">
+                <div>
+                  <span className="text-nothing-text-muted">USED </span>
+                  <span className="text-nothing-text">{formatTokenCount(sonnetBudget.used)}</span>
+                </div>
+                <div>
+                  <span className="text-nothing-text-muted">REMAINING </span>
+                  <span className="text-[#5B9BF6]">{formatTokenCount(sonnetBudget.remaining)}</span>
+                </div>
+                <div>
+                  <span className="text-nothing-text-muted">BUDGET </span>
+                  <span className="text-nothing-text-dim">{formatTokenCount(sonnetBudget.budget)}</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
@@ -386,6 +410,7 @@ export default function OverviewPage() {
   const [ccStatus, setCcStatus] = useState<ClaudeCodeStatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [turnFilter, setTurnFilter] = useState<'5h' | '1d' | '7d' | '30d'>('1d');
   const lastRefreshRef = useRef<Date>(new Date());
 
   const fetchLive = useCallback(async () => {
@@ -570,20 +595,26 @@ export default function OverviewPage() {
   if (loading) {
     return (
       <div className="p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-40" />
-          <Skeleton className="h-40" />
+        {/* Section header placeholder */}
+        <div style={{ height: 20 }} />
+        {/* Rate limit panels */}
+        <div className="grid grid-cols-2 gap-4" style={{ minHeight: 192 }}>
+          <Skeleton style={{ height: 192 }} />
+          <Skeleton style={{ height: 192 }} />
         </div>
-        <div className="grid grid-cols-4 gap-4">
+        {/* KPI metric cards */}
+        <div className="grid grid-cols-4 gap-4" style={{ minHeight: 96 }}>
           {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24" />
+            <Skeleton key={i} style={{ height: 96 }} />
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-60" />
-          <Skeleton className="h-60" />
+        {/* Charts */}
+        <div className="grid grid-cols-2 gap-4" style={{ minHeight: 300 }}>
+          <Skeleton style={{ height: 300 }} />
+          <Skeleton style={{ height: 300 }} />
         </div>
-        <Skeleton className="h-56" />
+        {/* Table */}
+        <Skeleton style={{ height: 400 }} />
       </div>
     );
   }
@@ -669,7 +700,7 @@ export default function OverviewPage() {
         </div>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4" style={{ minHeight: 192 }}>
         {live ? (
           <>
             <RateLimitPanel
@@ -685,6 +716,7 @@ export default function OverviewPage() {
               resetsAt={live.sevenDayResetsAt}
               overagePct={live.overage}
               budget={live.tokenBudget?.sevenDay}
+              sonnetBudget={live.tokenBudget?.sonnet}
               delay={0.05}
             />
           </>
@@ -731,8 +763,133 @@ export default function OverviewPage() {
         </motion.div>
       </motion.div>
 
+      {/* ── Token Usage by Turn ─────────────────────────────────────────── */}
+      <motion.div variants={fadeUp}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle style={{ fontFamily: 'Space Mono, monospace', color: '#E8E8E8' }}>
+              Token Usage by Turn
+            </CardTitle>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {(['5h', '1d', '7d', '30d'] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setTurnFilter(f)}
+                  style={{
+                    fontFamily: 'Space Mono, monospace',
+                    fontSize: 10,
+                    letterSpacing: '0.05em',
+                    padding: '4px 10px',
+                    borderRadius: 4,
+                    border: `1px solid ${turnFilter === f ? '#4A9E5C' : '#333'}`,
+                    background: turnFilter === f ? '#4A9E5C22' : 'transparent',
+                    color: turnFilter === f ? '#4A9E5C' : '#666',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ChartWrapper height={280}>
+              <ComposedChart
+                barCategoryGap="20%"
+                barGap={2}
+                data={(() => {
+                  const cutoffMs = { '5h': 5 * 3600000, '1d': 86400000, '7d': 7 * 86400000, '30d': 30 * 86400000 }[turnFilter];
+                  const cutoff = new Date(Date.now() - cutoffMs);
+                  const filtered = [...agents]
+                    .filter((a) => new Date(a.timestamp) > cutoff)
+                    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                  // Bucket into 5-min windows — aggregate input/output/cached per bucket
+                  const bucketMs = 5 * 60_000;
+                  const buckets = new Map<number, { input: number; output: number; cached: number; cost: number }>();
+                  for (const a of filtered) {
+                    const t = Math.floor(new Date(a.timestamp).getTime() / bucketMs) * bucketMs;
+                    const entry = buckets.get(t) || { input: 0, output: 0, cached: 0, cost: 0 };
+                    entry.input += a.input_tokens ?? 0;
+                    entry.output += a.output_tokens ?? 0;
+                    entry.cached += a.cached_tokens ?? 0;
+                    entry.cost += a.cost_usd ?? 0;
+                    buckets.set(t, entry);
+                  }
+                  const bucketKeys = [...buckets.keys()].sort((a, b) => a - b);
+                  // Trimmed mean trendline: sliding 6-bucket window, drop top+bottom 10%
+                  const windowSize = 6;
+                  const trimmedAvg = new Map<number, number>();
+                  for (let i = 0; i < bucketKeys.length; i++) {
+                    const slice = bucketKeys.slice(Math.max(0, i - windowSize + 1), i + 1);
+                    const vals = slice.map((k) => {
+                      const b = buckets.get(k)!;
+                      return b.input + b.output + b.cached;
+                    }).sort((a, b) => a - b);
+                    const trimCount = Math.floor(vals.length * 0.1);
+                    const trimmed = vals.slice(trimCount, vals.length - trimCount || undefined);
+                    trimmedAvg.set(bucketKeys[i], trimmed.length ? trimmed.reduce((s, v) => s + v, 0) / trimmed.length : 0);
+                  }
+                  const useShortTs = turnFilter === '5h' || turnFilter === '1d';
+                  return bucketKeys.map((t) => {
+                    const b = buckets.get(t)!;
+                    const d = new Date(t);
+                    const dEnd = new Date(t + bucketMs);
+                    const fmtTime = (dt: Date) => dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const fmtDate = (dt: Date) => dt.toLocaleDateString([], { month: 'short', day: 'numeric' });
+                    const ts = useShortTs ? fmtTime(d) : `${fmtDate(d)} ${fmtTime(d)}`;
+                    const windowLabel = useShortTs
+                      ? `${fmtTime(d)} – ${fmtTime(dEnd)}`
+                      : `${fmtDate(d)} ${fmtTime(d)} – ${fmtTime(dEnd)}`;
+                    return {
+                      ts,
+                      windowLabel,
+                      input: b.input,
+                      output: b.output,
+                      cachedRaw: b.cached,
+                      cached: Math.round(b.cached / 10),
+                      trend: Math.round(trimmedAvg.get(t) ?? 0),
+                      cost: b.cost,
+                    };
+                  });
+                })()}
+              >
+                <XAxis dataKey="ts" tick={<ChartAxisTick />} axisLine={{ stroke: '#333' }} tickLine={false} interval="preserveStartEnd" />
+                <YAxis yAxisId="left" tick={<ChartYAxisTick />} axisLine={{ stroke: '#333' }} tickLine={false} width={55} />
+                <YAxis yAxisId="right" orientation="right" tick={<ChartYAxisTick />} axisLine={{ stroke: '#333' }} tickLine={false} width={55} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0]?.payload;
+                    return (
+                      <div style={{ background: '#111', border: '1px solid #333', padding: '10px 14px', borderRadius: 6, fontFamily: 'Space Mono, monospace', fontSize: 11 }}>
+                        <div style={{ color: '#999', marginBottom: 6 }}>{d?.windowLabel ?? d?.ts}</div>
+                        <div style={{ color: '#4A9E5C' }}>Input: {(d?.input ?? 0).toLocaleString()}</div>
+                        <div style={{ color: '#D4A843' }}>Output: {(d?.output ?? 0).toLocaleString()}</div>
+                        <div style={{ color: '#5B9BF6' }}>Cached: {(d?.cachedRaw ?? 0).toLocaleString()} <span style={{ color: '#666' }}>(÷10 → {(d?.cached ?? 0).toLocaleString()})</span></div>
+                        <div style={{ color: '#E8E8E8', marginTop: 4 }}>Total: {((d?.input ?? 0) + (d?.output ?? 0) + (d?.cachedRaw ?? 0)).toLocaleString()}</div>
+                        <div style={{ color: '#E8E8E8', marginTop: 4 }}>Trend: {(d?.trend ?? 0).toLocaleString()}</div>
+                        <div style={{ color: '#666' }}>Cost: ${(d?.cost ?? 0).toFixed(4)}</div>
+                      </div>
+                    );
+                  }}
+                />
+                <Bar yAxisId="left" dataKey="cached" stackId="tokens" fill="#5B9BF6" name="Cached (÷10)" radius={[0, 0, 0, 0]} {...CHART_ANIMATION.bar} />
+                <Bar yAxisId="left" dataKey="input" stackId="tokens" fill="#4A9E5C" name="Input" radius={[0, 0, 0, 0]} {...CHART_ANIMATION.bar} />
+                <Bar yAxisId="left" dataKey="output" stackId="tokens" fill="#D4A843" name="Output" radius={[2, 2, 0, 0]} {...CHART_ANIMATION.bar} />
+                <Line yAxisId="right" type="monotone" dataKey="trend" stroke="#E8E8E8" strokeWidth={1.5} dot={false} name="Trend (trimmed)" strokeDasharray="4 2" />
+                <Legend
+                  wrapperStyle={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#999' }}
+                  iconType="square"
+                />
+              </ComposedChart>
+            </ChartWrapper>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* ── Charts ─────────────────────────────────────────────────────────── */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4" style={{ minHeight: 300 }}>
         {/* Token Usage 7-day area chart */}
         <Card>
           <CardHeader>

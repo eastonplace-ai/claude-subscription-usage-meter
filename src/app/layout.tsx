@@ -31,20 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen bg-nothing-bg text-nothing-text antialiased">
-        <ThemeProvider>
-          <FilterProvider>
-            <div className="flex h-screen overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 flex flex-col overflow-hidden">
-              <Header />
-              <div className="flex-1 overflow-y-auto p-6" style={{ backgroundImage: 'radial-gradient(circle, var(--dot-color) 0.7px, transparent 0.7px)', backgroundSize: '16px 16px' }}>
-                {children}
-              </div>
-            </main>
-            </div>
-            <CommandPalette />
-          </FilterProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );

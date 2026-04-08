@@ -14,8 +14,8 @@ function computeTokenBudgets(tokenLog: any[], fiveHourPct: number, sevenDayPct: 
   for (const e of tokenLog) {
     const ts = new Date(e.timestamp).getTime();
     if (isNaN(ts)) continue;
-    // Weighted tokens = input + output + cache_write (cache reads are free)
-    const w = (e.input_tokens ?? 0) + (e.output_tokens ?? 0) + (e.cache_write_tokens ?? 0);
+    // Weighted tokens = input + output + cached at 1/10th (Anthropic cache billing rate)
+    const w = (e.input_tokens ?? 0) + (e.output_tokens ?? 0) + ((e.cached_tokens ?? 0) * 0.1);
     if (ts >= fiveHourCutoff) weighted5h += w;
     if (ts >= sevenDayCutoff) weighted7d += w;
   }
@@ -68,6 +68,10 @@ export async function GET() {
 
     const { tokenBudget } = computeTokenBudgets(tokenLog, fiveHour, sevenDay);
 
+    // Sonnet-specific budget from overage percentage
+    const sonnetLog = tokenLog.filter((e: any) => (e.model ?? '').toLowerCase().includes('sonnet'));
+    const { tokenBudget: sonnetBudgets } = computeTokenBudgets(sonnetLog, fiveHour, overage);
+
     return NextResponse.json({
       ts,
       fiveHour,
@@ -76,7 +80,10 @@ export async function GET() {
       fiveHourResetsAt: '',
       sevenDayResetsAt: '',
       source,
-      tokenBudget,
+      tokenBudget: {
+        ...tokenBudget,
+        sonnet: sonnetBudgets.sevenDay,
+      },
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });

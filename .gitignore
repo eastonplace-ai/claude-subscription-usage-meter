@@ -6,3 +6,8 @@ electron-dist/
 *.dmg
 *.zip
 .env.local
+tasks/
+.claude/
+menubar-ui-mockup.drawio
+.$*
+graphify-out/

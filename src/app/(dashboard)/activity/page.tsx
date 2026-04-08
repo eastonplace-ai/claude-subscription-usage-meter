@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart,
@@ -73,6 +73,7 @@ interface AgentEntry {
   cached_tokens: number;
   cost_usd: number;
   tool_calls: number;
+  session_id?: string;
 }
 
 interface HeatmapCell {
@@ -233,17 +234,37 @@ function RangeTabs({ active, onChange }: { active: RangeDays; onChange: (r: Rang
 
 const LEFT_PAD = 32;
 const TOP_PAD = 20;
+const GAP = 2;
+const MIN_CELL = 6;
+const MAX_CELL = 18;
 
 function ActivityHeatmap({ daily, rangeDays }: { daily: Record<string, DayActivity>; rangeDays: RangeDays }) {
-  const { cell: CELL, gap: GAP } = cellSizeForRange(rangeDays);
-  const STEP = CELL + GAP;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   const cells = useMemo(() => buildHeatmap(daily, rangeDays), [daily, rangeDays]);
   const monthLabels = useMemo(() => buildMonthLabels(cells), [cells]);
   const todayKey = format(new Date(), 'yyyy-MM-dd');
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, date: '', count: 0 });
   const maxWeek = useMemo(() => Math.max(...cells.map((c) => c.weekIdx)), [cells]);
   const totalWeeks = maxWeek + 1;
-  const svgWidth = LEFT_PAD + totalWeeks * STEP;
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width ?? 0;
+      if (w > 0) setContainerWidth(w);
+    });
+    obs.observe(containerRef.current);
+    // initial measurement
+    setContainerWidth(containerRef.current.getBoundingClientRect().width);
+    return () => obs.disconnect();
+  }, []);
+
+  const CELL = containerWidth > 0
+    ? Math.min(MAX_CELL, Math.max(MIN_CELL, Math.floor((containerWidth - LEFT_PAD) / totalWeeks) - GAP))
+    : 10;
+  const STEP = CELL + GAP;
+  const svgWidth = containerWidth > 0 ? containerWidth : LEFT_PAD + totalWeeks * STEP;
   const svgHeight = TOP_PAD + 7 * STEP;
   const rx = Math.max(1, Math.round(CELL / 5));
 
@@ -256,8 +277,8 @@ function ActivityHeatmap({ daily, rangeDays }: { daily: Record<string, DayActivi
   const dayLabels = [{ label: 'Mon', row: 0 }, { label: 'Wed', row: 2 }, { label: 'Fri', row: 4 }];
 
   return (
-    <div className="relative w-full overflow-x-auto">
-      <svg width={svgWidth} height={svgHeight} className="overflow-visible" style={{ display: 'block', minWidth: svgWidth }}>
+    <div ref={containerRef} className="relative w-full overflow-x-auto">
+      <svg width={svgWidth} height={svgHeight} className="overflow-visible" style={{ display: 'block', width: '100%', minWidth: LEFT_PAD + totalWeeks * (MIN_CELL + GAP) }}>
         {monthLabels.map(({ label, weekIdx }) => (
           <text key={label + weekIdx} x={LEFT_PAD + weekIdx * STEP} y={TOP_PAD - 6} fontSize={Math.max(7, CELL - 3)} fontFamily="'Space Mono', monospace" fill="var(--nothing-text-muted)">{label}</text>
         ))}
@@ -324,7 +345,7 @@ function HourDistribution({ hourly }: { hourly: Record<string, number> }) {
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-        <XAxis dataKey="label" tick={<ChartAxisTick />} tickLine={false} axisLine={false} interval={2} />
+        <XAxis dataKey="label" tick={<ChartAxisTick />} tickLine={false} axisLine={false} interval={0} />
         <YAxis tick={<ChartYAxisTick />} tickLine={false} axisLine={false} />
         <Tooltip
           content={({ active, payload }) => {
@@ -364,6 +385,8 @@ export default function ActivityCostsPage() {
   const [activity, setActivity] = useState<ActivityData | null>(null);
   const [costs, setCosts] = useState<CostEntry[]>([]);
   const [agents, setAgents] = useState<AgentEntry[]>([]);
+  const [allTimeAgents, setAllTimeAgents] = useState<AgentEntry[]>([]);
+  const [allTimeCosts, setAllTimeCosts] = useState<CostEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [rangeDays, setRangeDays] = useState<RangeDays>(30);
   const [rangeAutoSet, setRangeAutoSet] = useState(false);
@@ -374,11 +397,15 @@ export default function ActivityCostsPage() {
       fetch(`/api/activity${fp}`).then((r) => r.json()),
       fetch(`/api/costs${fp}`).then((r) => r.json()),
       fetch(`/api/agents${fp}`).then((r) => r.json()),
+      fetch(`/api/agents`).then((r) => r.json()),
+      fetch(`/api/costs`).then((r) => r.json()),
     ])
-      .then(([act, costData, agentData]) => {
+      .then(([act, costData, agentData, allAgentData, allCostData]) => {
         setActivity(act);
         setCosts(Array.isArray(costData) ? costData : []);
         setAgents(Array.isArray(agentData) ? agentData : []);
+        setAllTimeAgents(Array.isArray(allAgentData) ? allAgentData : []);
+        setAllTimeCosts(Array.isArray(allCostData) ? allCostData : []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -411,13 +438,11 @@ export default function ActivityCostsPage() {
     let totalCost = 0;
     let weekCost = 0;
     let cacheSavings = 0;
-    const sessionCosts: Record<string, number> = {};
 
     for (const e of costs) {
       totalCost += e.estimated_cost_usd;
       const ts = safeParseDate(e.timestamp);
       if (ts && isAfter(ts, weekAgo)) weekCost += e.estimated_cost_usd;
-      sessionCosts[e.session_id] = (sessionCosts[e.session_id] ?? 0) + e.estimated_cost_usd;
     }
     for (const e of agents) {
       totalCost += e.cost_usd;
@@ -426,22 +451,58 @@ export default function ActivityCostsPage() {
       cacheSavings += (e.cached_tokens ?? 0) * CACHED_TOKEN_SAVE_RATE;
     }
 
-    const sessionValues = Object.values(sessionCosts);
+    // Avg cost/session: always computed from ALL-TIME data so time filter doesn't zero it out
+    const allTimeSessionCosts: Record<string, number> = {};
+    for (const e of allTimeCosts) {
+      allTimeSessionCosts[e.session_id] = (allTimeSessionCosts[e.session_id] ?? 0) + e.estimated_cost_usd;
+    }
+    for (const e of allTimeAgents) {
+      if (e.session_id) {
+        allTimeSessionCosts[e.session_id] = (allTimeSessionCosts[e.session_id] ?? 0) + (e.cost_usd ?? 0);
+      }
+    }
+    const sessionValues = Object.values(allTimeSessionCosts).filter((v) => v > 0);
     const avgCostPerSession = sessionValues.length > 0
       ? sessionValues.reduce((a, b) => a + b, 0) / sessionValues.length
       : 0;
 
     return { totalCost, weekCost, cacheSavings, avgCostPerSession };
-  }, [costs, agents]);
+  }, [costs, agents, allTimeCosts, allTimeAgents]);
+
+  // ── Cache efficiency stats ────────────────────────────────────────────────
+
+  const cacheStats = useMemo(() => {
+    const entriesWithCache = agents.filter((e) => (e.cached_tokens ?? 0) > 0);
+    const hitRate = agents.length > 0 ? (entriesWithCache.length / agents.length) * 100 : 0;
+
+    const totalCached = agents.reduce((s, e) => s + (e.cached_tokens ?? 0), 0);
+    const totalInput = agents.reduce((s, e) => s + (e.input_tokens ?? 0), 0);
+    const totalOutput = agents.reduce((s, e) => s + (e.output_tokens ?? 0), 0);
+
+    // Cost paid for cache reads: $1/MTok
+    const costPaid = (totalCached / 1_000_000) * 1.0;
+    // What it would've cost at full Sonnet input price: $3/MTok
+    const costUncached = (totalCached / 1_000_000) * 3.0;
+    const savings = costUncached - costPaid;
+
+    const totalTokens = totalInput + totalOutput + totalCached;
+    const inputPct = totalTokens > 0 ? (totalInput / totalTokens) * 100 : 0;
+    const outputPct = totalTokens > 0 ? (totalOutput / totalTokens) * 100 : 0;
+    const cachedPct = totalTokens > 0 ? (totalCached / totalTokens) * 100 : 0;
+
+    return { hitRate, totalCached, totalInput, totalOutput, costPaid, costUncached, savings, inputPct, outputPct, cachedPct };
+  }, [agents]);
 
   // ── Model donut data ──────────────────────────────────────────────────────
 
   const modelData = useMemo(() => {
+    // Always use all-time data for model breakdown (not time-filtered)
     const map: Record<string, number> = {};
-    for (const e of costs) map[e.model] = (map[e.model] ?? 0) + e.estimated_cost_usd;
-    for (const e of agents) map[e.model] = (map[e.model] ?? 0) + (e.cost_usd ?? 0);
+    for (const e of allTimeCosts) map[e.model] = (map[e.model] ?? 0) + e.estimated_cost_usd;
+    for (const e of allTimeAgents) map[e.model] = (map[e.model] ?? 0) + (e.cost_usd ?? 0);
     const total = Object.values(map).reduce((a, b) => a + b, 0) || 1;
     return Object.entries(map)
+      .filter(([model, cost]) => model !== 'unknown' && cost > 0)
       .sort((a, b) => b[1] - a[1])
       .map(([model, cost]) => ({
         model,
@@ -450,7 +511,7 @@ export default function ActivityCostsPage() {
         pct: parseFloat(((cost / total) * 100).toFixed(1)),
         color: getModelColor(model),
       }));
-  }, [costs, agents]);
+  }, [allTimeCosts, allTimeAgents]);
 
   const modelTotal = modelData.reduce((a, b) => a + b.cost, 0);
 
@@ -458,17 +519,18 @@ export default function ActivityCostsPage() {
 
   const dailyTrendData = useMemo(() => {
     const today = startOfDay(new Date());
+    // Always use all-time data for the 30-day trend (ignore time filter)
     const days: Record<string, number> = {};
     for (let i = 29; i >= 0; i--) {
       const d = format(subDays(today, i), 'yyyy-MM-dd');
       days[d] = 0;
     }
-    for (const e of costs) {
+    for (const e of allTimeCosts) {
       const ts = safeParseDate(e.timestamp);
       const d = ts ? format(ts, 'yyyy-MM-dd') : '';
       if (d && d in days) days[d] += e.estimated_cost_usd;
     }
-    for (const e of agents) {
+    for (const e of allTimeAgents) {
       const ts = safeParseDate(e.timestamp);
       const d = ts ? format(ts, 'yyyy-MM-dd') : '';
       if (d && d in days) days[d] += e.cost_usd;
@@ -479,7 +541,7 @@ export default function ActivityCostsPage() {
       const pd = safeParseDate(date);
       return { date: pd ? format(pd, 'MMM d') : date, cost: parseFloat(cost.toFixed(4)), running: parseFloat(running.toFixed(4)) };
     });
-  }, [costs, agents]);
+  }, [allTimeCosts, allTimeAgents]);
 
   // ── Table data ────────────────────────────────────────────────────────────
 
@@ -733,7 +795,7 @@ export default function ActivityCostsPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid stroke={CHART_DEFAULTS.gridColor} strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" tick={<ChartAxisTick />} axisLine={{ stroke: CHART_DEFAULTS.axisColor }} tickLine={false} interval={4} />
+                    <XAxis dataKey="date" tick={<ChartAxisTick />} axisLine={{ stroke: CHART_DEFAULTS.axisColor }} tickLine={false} interval={3} />
                     <YAxis yAxisId="left" tick={<ChartYAxisTick />} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v.toFixed(2)}`} width={52} />
                     <YAxis yAxisId="right" orientation="right" tick={<ChartYAxisTick />} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v.toFixed(2)}`} width={52} />
                     <Tooltip content={<ChartTooltip formatter={(v) => `$${typeof v === 'number' ? v.toFixed(4) : v}`} />} />
@@ -747,8 +809,109 @@ export default function ActivityCostsPage() {
         </motion.div>
       </div>
 
-      {/* ── Row 4: Cost breakdown table ── */}
+      {/* ── Row 4: Cache Efficiency ── */}
       <motion.div custom={4} initial="hidden" animate="visible" variants={cardVariants}>
+        <Card variant="default">
+          <CardHeader>
+            <CardTitle>
+              <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-nothing-text-muted">Cache Efficiency</span>
+            </CardTitle>
+            <span className="font-mono text-[9px] text-nothing-text-dim">Agent token log · blended estimates</span>
+          </CardHeader>
+          <CardContent>
+            {agents.length === 0 ? (
+              <div className="flex items-center justify-center h-20 font-mono text-[10px] text-nothing-text-dim">No agent data available</div>
+            ) : (
+              <div className="space-y-5">
+                {/* Top row: hit rate + savings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Cache Hit Rate */}
+                  <div className="space-y-1">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-nothing-text-dim">Cache Hit Rate</p>
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className="font-mono text-3xl font-bold"
+                        style={{
+                          color: cacheStats.hitRate >= 60 ? '#4A9E5C' : cacheStats.hitRate >= 30 ? '#D4A843' : '#D71921',
+                        }}
+                      >
+                        {cacheStats.hitRate.toFixed(1)}%
+                      </span>
+                      <span className="font-mono text-[10px] text-nothing-text-dim">of agent runs</span>
+                    </div>
+                    <p className="font-mono text-[9px] text-nothing-text-dim">
+                      {agents.filter((e) => (e.cached_tokens ?? 0) > 0).length} / {agents.length} entries with cached tokens
+                    </p>
+                  </div>
+
+                  {/* Cache Savings */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-nothing-text-dim">Cache Savings</p>
+                      <span
+                        className="font-mono text-[8px] px-1.5 py-0.5 rounded border cursor-help border-nothing-border text-nothing-text-dim"
+                        title="Blended estimate: cache reads $1/MTok, full input at $3/MTok (Sonnet rate). Claude Max = flat monthly fee — these numbers reflect token-rate equivalents only."
+                      >
+                        EST
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-nothing-text-dim mb-0.5">Cost Paid</p>
+                        <p className="font-mono text-sm font-bold text-nothing-text">${cacheStats.costPaid.toFixed(3)}</p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-nothing-text-dim mb-0.5">If Uncached</p>
+                        <p className="font-mono text-sm font-bold text-nothing-text-secondary">${cacheStats.costUncached.toFixed(3)}</p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-nothing-text-dim mb-0.5">Saved</p>
+                        <p className="font-mono text-sm font-bold" style={{ color: '#4A9E5C' }}>${cacheStats.savings.toFixed(3)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Token Breakdown Bar */}
+                <div className="space-y-1.5">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-nothing-text-dim">Token Breakdown</p>
+                  <div className="flex w-full h-3 rounded overflow-hidden gap-px">
+                    <div
+                      style={{ width: `${cacheStats.inputPct}%`, backgroundColor: '#5B9BF6' }}
+                      title={`Input: ${cacheStats.totalInput.toLocaleString()} tokens (${cacheStats.inputPct.toFixed(1)}%)`}
+                    />
+                    <div
+                      style={{ width: `${cacheStats.outputPct}%`, backgroundColor: '#9B5BF6' }}
+                      title={`Output: ${cacheStats.totalOutput.toLocaleString()} tokens (${cacheStats.outputPct.toFixed(1)}%)`}
+                    />
+                    <div
+                      style={{ width: `${cacheStats.cachedPct}%`, backgroundColor: '#4A9E5C' }}
+                      title={`Cached: ${cacheStats.totalCached.toLocaleString()} tokens (${cacheStats.cachedPct.toFixed(1)}%)`}
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="font-mono text-[9px] text-nothing-text-dim flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 rounded-sm" style={{ backgroundColor: '#5B9BF6' }} />
+                      Input {cacheStats.inputPct.toFixed(0)}%
+                    </span>
+                    <span className="font-mono text-[9px] text-nothing-text-dim flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 rounded-sm" style={{ backgroundColor: '#9B5BF6' }} />
+                      Output {cacheStats.outputPct.toFixed(0)}%
+                    </span>
+                    <span className="font-mono text-[9px] text-nothing-text-dim flex items-center gap-1">
+                      <span className="inline-block w-2 h-2 rounded-sm" style={{ backgroundColor: '#4A9E5C' }} />
+                      Cached {cacheStats.cachedPct.toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* ── Row 5: Cost breakdown table ── */}
+      <motion.div custom={5} initial="hidden" animate="visible" variants={cardVariants}>
         <Card variant="default">
           <CardHeader>
             <CardTitle>

@@ -1,4 +1,4 @@
-appId: com.easton.claude-usage
+appId: com.claude-usage-dashboard.app
 productName: Claude Usage Dashboard
 directories:
   output: dist

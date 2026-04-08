@@ -14,6 +14,7 @@ import {
   Bot,
   Settings,
   Gauge,
+  Brain,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: '/tools', label: 'Tools', icon: Wrench },
   { href: '/agents', label: 'Agents', icon: Bot },
   { href: '/plans', label: 'Plans', icon: FileText },
+  { href: '/second-brain', label: 'Second Brain', icon: Brain },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

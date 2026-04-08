@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
-import { getTokenLog } from '@/lib/claude-reader';
+import { getTokenLog, computeEntryCost } from '@/lib/claude-reader';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,6 +11,11 @@ export async function GET(request: NextRequest) {
     if (cutoff) {
       data = data.filter((e) => e.timestamp && new Date(e.timestamp) > cutoff);
     }
+    // Use original cost_usd from token-log; only recalculate if missing
+    data = data.map((e: any) => ({
+      ...e,
+      cost_usd: e.cost_usd != null && e.cost_usd > 0 ? e.cost_usd : computeEntryCost(e),
+    }));
     return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
