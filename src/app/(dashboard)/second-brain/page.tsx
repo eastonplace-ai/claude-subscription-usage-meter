@@ -103,7 +103,6 @@ function friendlyFileName(filePath: string): string {
   // Known project name overrides
   const knownProjects: Record<string, string> = {
     'agentsmonitor': 'Agents Monitor',
-    'gridintel': 'GridIntel',
     'architecture': 'Architecture',
     'dashboard-claude': 'Dashboard Config',
     'dashboard': 'Dashboard Config',

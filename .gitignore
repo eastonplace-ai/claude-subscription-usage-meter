@@ -11,3 +11,6 @@ tasks/
 menubar-ui-mockup.drawio
 .$*
 graphify-out/
+
+lib/
+.expect/
