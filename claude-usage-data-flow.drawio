@@ -1,0 +1,263 @@
+<mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" background="#FFFFFF">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="title" value="Claude Usage Dashboard — How Data Flows" style="text;html=1;fontSize=24;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#111111;align=left;" vertex="1" parent="1">
+      <mxGeometry x="50" y="20" width="600" height="36" as="geometry"/>
+    </mxCell>
+    <mxCell id="subtitle" value="Where the data lives, how it gets processed, and what you see on screen" style="text;html=1;fontSize=13;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#777777;align=left;" vertex="1" parent="1">
+      <mxGeometry x="50" y="56" width="600" height="20" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_mac" value="YOUR MAC" style="swimlane;startSize=32;fillColor=#E8F5E9;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontStyle=1;fontSize=14;fontColor=#2E7D32;rounded=1;arcSize=6;swimlaneLine=0;" vertex="1" parent="1">
+      <mxGeometry x="50" y="100" width="420" height="680" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="sec_claude" value="Claude Code Local Files" style="text;html=1;fontSize=12;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#2E7D32;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="40" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec_claude_desc" value="Stored in your home folder — created automatically by Claude Code" style="text;html=1;fontSize=10;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#888888;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="58" width="390" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="f1" value="Command History&#xa;Every prompt you've typed (718 entries)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="82" width="190" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="f2" value="Token Costs&#xa;What each session cost (474 entries)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="215" y="82" width="190" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="f3" value="Activity Stats&#xa;When you use Claude (by day and hour)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="148" width="190" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="f4" value="Session Summaries&#xa;What happened in each session (17+)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="215" y="148" width="190" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="f5" value="Project Data&#xa;35 projects with full conversation logs&#xa;(tokens, models, tools used per session)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="214" width="190" height="62" as="geometry"/>
+    </mxCell>
+    <mxCell id="f6" value="Plans&#xa;Implementation plans (10 files)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="215" y="214" width="190" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="f7" value="Settings&#xa;Your model, hooks, and plugins config" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#66BB6A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="290" width="190" height="52" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_agents" value="Your Agent Logs" style="swimlane;startSize=24;fillColor=#FFF3E0;strokeColor=#D4A843;fontFamily=Space Grotesk;fontStyle=1;fontSize=11;fontColor=#E65100;rounded=1;arcSize=8;swimlaneLine=0;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="362" width="390" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="f8" value="Agent Task Log&#xa;620 entries — what Bento, Enzo,&#xa;Jarvis, and Parent did" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_agents">
+      <mxGeometry x="10" y="32" width="175" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="f9" value="Rate Limit Snapshot&#xa;Your current usage %&#xa;(local backup)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=0.12;rounded=1;" vertex="1" parent="zone_agents">
+      <mxGeometry x="205" y="32" width="175" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="f10" value="Usage Poller — runs every 2 min, checks your Claude rate limits" style="shape=hexagon;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#333333;size=0.1;" vertex="1" parent="zone_agents">
+      <mxGeometry x="50" y="97" width="290" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_menubar" value="Menu Bar Widget" style="swimlane;startSize=24;fillColor=#ECEFF1;strokeColor=#78909C;fontFamily=Space Grotesk;fontStyle=1;fontSize=11;fontColor=#37474F;rounded=1;arcSize=8;swimlaneLine=0;" vertex="1" parent="zone_mac">
+      <mxGeometry x="15" y="520" width="390" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="mb1" value="Shows your rate limit bars in the Mac menu bar&#xa;(the little icon at the top of your screen)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#78909C;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;" vertex="1" parent="zone_menubar">
+      <mxGeometry x="10" y="32" width="370" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="mb2" value="&quot;Open Dashboard&quot; button launches the full Electron app" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;fontStyle=1;" vertex="1" parent="zone_menubar">
+      <mxGeometry x="10" y="80" width="370" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_cloud" value="CLOUD (Supabase Database)" style="swimlane;startSize=32;fillColor=#E3F2FD;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontStyle=1;fontSize=14;fontColor=#1565C0;rounded=1;arcSize=6;swimlaneLine=0;" vertex="1" parent="1">
+      <mxGeometry x="50" y="820" width="420" height="280" as="geometry"/>
+    </mxCell>
+    <mxCell id="cloud_desc" value="Accessible from any device — your work laptop, phone, etc." style="text;html=1;fontSize=10;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#5B9BF6;" vertex="1" parent="zone_cloud">
+      <mxGeometry x="15" y="36" width="390" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="sb1" value="Live Rate Limits&#xa;How much of your 5-hour and 7-day&#xa;Claude quota you've used (updated every 2 min)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=10;" vertex="1" parent="zone_cloud">
+      <mxGeometry x="15" y="62" width="190" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="sb2" value="Tool Call Events&#xa;Which tools Claude used&#xa;and when" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=10;" vertex="1" parent="zone_cloud">
+      <mxGeometry x="215" y="62" width="190" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="sb3" value="Agent Token Usage&#xa;How many tokens each agent&#xa;(Bento, Enzo, Jarvis) burned" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;size=10;" vertex="1" parent="zone_cloud">
+      <mxGeometry x="15" y="152" width="190" height="75" as="geometry"/>
+    </mxCell>
+    <mxCell id="cloud_arrow_label" value="The usage poller writes here every 2 minutes" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#5B9BF6;align=center;" vertex="1" parent="zone_cloud">
+      <mxGeometry x="15" y="245" width="390" height="16" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_engine" value="DATA PROCESSING ENGINE" style="swimlane;startSize=32;fillColor=#F3E5F5;strokeColor=#9C27B0;fontFamily=Space Grotesk;fontStyle=1;fontSize=14;fontColor=#6A1B9A;rounded=1;arcSize=6;swimlaneLine=0;" vertex="1" parent="1">
+      <mxGeometry x="560" y="100" width="320" height="540" as="geometry"/>
+    </mxCell>
+    <mxCell id="engine_desc" value="Reads all your local files and cloud data,&#xa;then serves it to the dashboard pages" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#9C27B0;align=center;" vertex="1" parent="zone_engine">
+      <mxGeometry x="10" y="36" width="300" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="fn1" value="Read Command History" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="80" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn2" value="Calculate Token Costs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="118" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn3" value="Build Activity Heatmap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="156" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn4" value="Parse Session Summaries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="194" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn5" value="Analyze Projects (tokens, cost, models per project)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="232" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn6" value="Load Plans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="270" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn7" value="Read Settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="308" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn8" value="Count Tool Usage (133 tools found)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="346" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn9" value="Track Agent Activity (Bento, Enzo, Jarvis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="384" width="280" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn10" value="Fetch Live Rate Limits (from Supabase)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="422" width="280" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="engine_note" value="All processing happens on your Mac —&#xa;nothing is sent to external servers" style="text;html=1;fontSize=10;fontFamily=Space Grotesk;fontStyle=3;fillColor=none;strokeColor=none;fontColor=#6A1B9A;align=center;" vertex="1" parent="zone_engine">
+      <mxGeometry x="20" y="478" width="280" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_app" value="DASHBOARD APP (what you see)" style="swimlane;startSize=32;fillColor=#FCE4EC;strokeColor=#E53935;fontFamily=Space Grotesk;fontStyle=1;fontSize=14;fontColor=#B71C1C;rounded=1;arcSize=6;swimlaneLine=0;" vertex="1" parent="1">
+      <mxGeometry x="970" y="100" width="340" height="540" as="geometry"/>
+    </mxCell>
+    <mxCell id="app_desc" value="10 pages inside a native Mac app window&#xa;with sidebar navigation and animations" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#E53935;align=center;" vertex="1" parent="zone_app">
+      <mxGeometry x="10" y="36" width="320" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="pg1" value="Overview&#xa;Live rate limit bars, key metrics, 7-day chart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="76" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg2" value="Projects&#xa;Your 35 projects with tokens, cost, and model breakdown" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="122" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg3" value="Sessions&#xa;Timeline of what happened in each coding session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="168" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg4" value="Costs&#xa;How much you're spending, broken down by model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="214" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg5" value="Tools&#xa;Which 133 tools Claude uses most (Read, Write, Bash, etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="260" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg6" value="Activity&#xa;GitHub-style heatmap showing when you code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="306" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg7" value="History&#xa;Searchable list of every command you've run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="352" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg8" value="Plans&#xa;Your saved implementation plans with formatting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="398" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg9" value="Agents&#xa;What Bento, Enzo, and Jarvis have been doing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="444" width="310" height="38" as="geometry"/>
+    </mxCell>
+    <mxCell id="pg10" value="Settings&#xa;Your Claude model, hooks, env vars, and plugins" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#EF9A9A;fontFamily=Space Grotesk;fontSize=10;fontColor=#333333;align=left;spacingLeft=10;" vertex="1" parent="zone_app">
+      <mxGeometry x="15" y="490" width="310" height="38" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="zone_electron" value="HOW THE APP RUNS" style="swimlane;startSize=32;fillColor=#ECEFF1;strokeColor=#78909C;fontFamily=Space Grotesk;fontStyle=1;fontSize=14;fontColor=#37474F;rounded=1;arcSize=6;swimlaneLine=0;" vertex="1" parent="1">
+      <mxGeometry x="970" y="680" width="340" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="el1" value="Runs as a native Mac app (like Slack or VS Code)&#xa;Opens its own window — not in your browser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#78909C;fontFamily=Space Grotesk;fontSize=11;fontColor=#333333;" vertex="1" parent="zone_electron">
+      <mxGeometry x="15" y="42" width="310" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="el2" value="In development: runs on localhost:3099&#xa;When packaged: self-contained .app with built-in server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#78909C;fontFamily=Space Grotesk;fontSize=10;fontColor=#555555;" vertex="1" parent="zone_electron">
+      <mxGeometry x="15" y="94" width="310" height="42" as="geometry"/>
+    </mxCell>
+    <mxCell id="el3" value="Builds to a .dmg installer you can drag to Applications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#78909C;fontFamily=Space Grotesk;fontSize=10;fontColor=#555555;" vertex="1" parent="zone_electron">
+      <mxGeometry x="15" y="146" width="310" height="32" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow_files_engine" value="reads files" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4A9E5C;strokeWidth=2;fontFamily=Space Grotesk;fontSize=10;fontColor=#4A9E5C;fontStyle=1;entryX=0;entryY=0.35;entryDx=0;entryDy=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" source="zone_mac" target="zone_engine" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow_cloud_engine" value="fetches live data" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#5B9BF6;strokeWidth=2;dashed=1;dashPattern=8 4;fontFamily=Space Grotesk;fontSize=10;fontColor=#5B9BF6;fontStyle=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.85;entryDx=0;entryDy=0;" edge="1" source="zone_cloud" target="zone_engine" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="520" y="904"/>
+          <mxPoint x="520" y="559"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="arrow_poller_cloud" value="writes rate limits every 2 min" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D4A843;strokeWidth=2;dashed=1;dashPattern=8 4;fontFamily=Space Grotesk;fontSize=9;fontColor=#D4A843;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="zone_agents" target="zone_cloud" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow_engine_app" value="serves data as JSON" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9C27B0;strokeWidth=3;fontFamily=Space Grotesk;fontSize=11;fontColor=#9C27B0;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="zone_engine" target="zone_app" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow_electron_app" value="displays in" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#78909C;strokeWidth=1.5;fontFamily=Space Grotesk;fontSize=10;fontColor=#78909C;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="zone_electron" target="zone_app" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="arrow_menubar_electron" value="opens the app" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4A9E5C;strokeWidth=2;dashed=1;dashPattern=8 4;fontFamily=Space Grotesk;fontSize=10;fontColor=#4A9E5C;fontStyle=1;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="zone_mac" target="zone_electron" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="510" y="738"/>
+          <mxPoint x="510" y="780"/>
+          <mxPoint x="970" y="780"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="arrow_cloud_menubar" value="also reads rate limits" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#5B9BF6;strokeWidth=1.5;dashed=1;dashPattern=8 4;fontFamily=Space Grotesk;fontSize=9;fontColor=#5B9BF6;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="sb1" target="zone_menubar" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="160" y="800"/>
+          <mxPoint x="260" y="800"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="legend" value="" style="swimlane;startSize=0;fillColor=#FAFAFA;strokeColor=#E0E0E0;rounded=1;arcSize=6;" vertex="1" parent="1">
+      <mxGeometry x="560" y="680" width="320" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_title" value="How to read this diagram" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#333333;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="8" width="200" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_solid" value="" style="endArrow=classic;strokeColor=#333333;strokeWidth=2;" edge="1" parent="legend">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="10" y="40" as="sourcePoint"/>
+        <mxPoint x="40" y="40" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="leg_solid_t" value="Reads directly from your disk" style="text;fontSize=10;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#555555;" vertex="1" parent="legend">
+      <mxGeometry x="48" y="33" width="200" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_dashed" value="" style="endArrow=classic;strokeColor=#333333;strokeWidth=2;dashed=1;dashPattern=8 4;" edge="1" parent="legend">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="10" y="62" as="sourcePoint"/>
+        <mxPoint x="40" y="62" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="leg_dashed_t" value="Goes over the network (internet)" style="text;fontSize=10;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#555555;" vertex="1" parent="legend">
+      <mxGeometry x="48" y="55" width="200" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_doc" value="" style="shape=document;fillColor=#FFFFFF;strokeColor=#999999;size=0.12;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="78" width="18" height="14" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_doc_t" value="= a file on your Mac" style="text;fontSize=10;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#555555;" vertex="1" parent="legend">
+      <mxGeometry x="34" y="76" width="130" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_cyl" value="" style="shape=cylinder3;fillColor=#FFFFFF;strokeColor=#999999;size=6;" vertex="1" parent="legend">
+      <mxGeometry x="165" y="75" width="18" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_cyl_t" value="= a cloud database table" style="text;fontSize=10;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#555555;" vertex="1" parent="legend">
+      <mxGeometry x="188" y="76" width="140" height="16" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

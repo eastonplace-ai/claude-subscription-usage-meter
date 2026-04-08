@@ -1,0 +1,36 @@
+appId: com.easton.claude-usage
+productName: Claude Usage Dashboard
+directories:
+  output: dist
+  buildResources: build
+files:
+  - electron-dist/**/*
+  - .next/**/*
+  - "!.next/dev/**"
+  - "!.next/cache/**"
+  - src/**/*
+  - lib/**/*
+  - components/**/*
+  - public/**/*
+  - next.config.ts
+  - package.json
+  - node_modules/**/*
+extraMetadata:
+  main: electron-dist/main.js
+mac:
+  category: public.app-category.developer-tools
+  identity: null
+  target:
+    - dmg
+    - zip
+  icon: build/icon.icns
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+asar: false
