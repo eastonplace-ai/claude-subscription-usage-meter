@@ -173,8 +173,8 @@ export default function MenubarPage() {
   }, [fetchAll]);
 
   const openDashboard = () => {
-    if ((window as Record<string, unknown>).electronAPI) {
-      (window as Record<string, unknown> & { electronAPI: { invoke: (ch: string) => void } }).electronAPI.invoke('menubar:openDashboard');
+    if ((window as unknown as Record<string, unknown>).electronAPI) {
+      (window as unknown as Record<string, unknown> & { electronAPI: { invoke: (ch: string) => void } }).electronAPI.invoke('menubar:openDashboard');
     } else {
       window.open('/', '_blank');
     }
