@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const WORKSPACE_DIR = process.env.WORKSPACE_DIR || '';
-const LOG_PATH = path.join(WORKSPACE_DIR, '.claude/agents/second-brain-log.jsonl');
-const VAULT_DIR = process.env.OBSIDIAN_VAULT_PATH || '';
+import { getAppConfig, getAppConfigHealth } from '@/lib/app-config';
 
 interface BrainLogEntry {
   timestamp: string;
@@ -21,27 +18,31 @@ interface BrainLogEntry {
 }
 
 export async function GET() {
-  if (!VAULT_DIR) {
-    return NextResponse.json({ error: 'Obsidian vault not configured. Set OBSIDIAN_VAULT_PATH.' }, { status: 503 });
-  }
   try {
+    const config = await getAppConfig();
+    const health = await getAppConfigHealth(config);
+    const logPath = config.workspaceDir
+      ? path.join(config.workspaceDir, '.claude/agents/second-brain-log.jsonl')
+      : '';
+
     // Read telemetry log
     let entries: BrainLogEntry[] = [];
-    if (fs.existsSync(LOG_PATH)) {
-      const lines = fs.readFileSync(LOG_PATH, 'utf-8').split('\n').filter(Boolean);
+    if (logPath && fs.existsSync(logPath)) {
+      const lines = fs.readFileSync(logPath, 'utf-8').split('\n').filter(Boolean);
       entries = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) as BrainLogEntry[];
     }
 
     // Vault stats
-    const vaultNotes = countFiles(VAULT_DIR, '.md');
-    const vaultDecisions = countFiles(path.join(VAULT_DIR, 'Decisions'), '.md');
-    const vaultSessions = countFiles(path.join(VAULT_DIR, 'Sessions'), '.md');
-    const vaultProjects = countFiles(path.join(VAULT_DIR, 'Projects'), '.md');
+    const vaultDir = health.obsidianVaultPath.available ? config.obsidianVaultPath : '';
+    const vaultNotes = vaultDir ? countFiles(vaultDir, '.md') : 0;
+    const vaultDecisions = vaultDir ? countFiles(path.join(vaultDir, 'Decisions'), '.md') : 0;
+    const vaultSessions = vaultDir ? countFiles(path.join(vaultDir, 'Sessions'), '.md') : 0;
+    const vaultProjects = vaultDir ? countFiles(path.join(vaultDir, 'Projects'), '.md') : 0;
 
     // Graphify stats
-    const graphPath = path.join(WORKSPACE_DIR, 'projects/claude-usage-electron/graphify-out/graph.json');
+    const graphPath = config.graphifyDir ? path.join(config.graphifyDir, 'graph.json') : '';
     let graphNodes = 0, graphEdges = 0, graphCommunities = 0;
-    if (fs.existsSync(graphPath)) {
+    if (graphPath && fs.existsSync(graphPath)) {
       try {
         const g = JSON.parse(fs.readFileSync(graphPath, 'utf-8'));
         graphNodes = g.nodes?.length ?? 0;
@@ -50,21 +51,7 @@ export async function GET() {
       } catch {}
     }
 
-    // Khoj health check
-    let khojOnline = false;
-    const khojUrl = process.env.KHOJ_URL || 'http://localhost:42110';
-    try {
-      const r = await fetch(`${khojUrl}/api/health`, { signal: AbortSignal.timeout(2000) });
-      khojOnline = r.ok;
-    } catch {
-      try {
-        const r = await fetch(`${khojUrl}/api/config/data/default`, {
-          headers: process.env.KHOJ_API_KEY ? { 'Authorization': `Bearer ${process.env.KHOJ_API_KEY}` } : {},
-          signal: AbortSignal.timeout(2000),
-        });
-        khojOnline = r.ok;
-      } catch {}
-    }
+    const khojOnline = health.khoj.online;
 
     // Aggregate telemetry
     const now = Date.now();
@@ -132,6 +119,12 @@ export async function GET() {
       .map(([file, count]) => ({ file, count }));
 
     return NextResponse.json({
+      integrations: {
+        workspace: health.workspaceDir,
+        obsidian: health.obsidianVaultPath,
+        graphify: health.graphifyDir,
+        khoj: health.khoj,
+      },
       vault: { notes: vaultNotes, decisions: vaultDecisions, sessions: vaultSessions, projects: vaultProjects },
       graphify: { nodes: graphNodes, edges: graphEdges, communities: graphCommunities },
       khoj: { online: khojOnline, avgLatencyMs: Math.round(avgKhojLatencyMs), totalResults: totalKhojResults },
@@ -164,7 +157,8 @@ export async function GET() {
       hourlyActivity,
       topFiles,
     });
-  } catch {
+  } catch (error) {
+    console.error('second-brain API error:', error);
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }

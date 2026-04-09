@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
-import os from 'os';
-import path from 'path';
 
-const SETTINGS_DIR = path.join(os.homedir(), '.claude-usage-dashboard');
-const SETTINGS_FILE = path.join(SETTINGS_DIR, 'menubar-settings.json');
+function getSettingsDir() {
+  const configuredDir = process.env.CLAUDE_USAGE_CONFIG_DIR?.trim();
+  if (configuredDir) return configuredDir;
+
+  const homeDir = process.env.HOME?.trim() || process.env.USERPROFILE?.trim() || '';
+  return homeDir ? `${homeDir}/.claude-usage-dashboard` : '.claude-usage-dashboard';
+}
+
+function getSettingsFile() {
+  return `${getSettingsDir()}/menubar-settings.json`;
+}
 
 const DEFAULT_SETTINGS = {
   enabled: true,
@@ -18,10 +25,11 @@ const DEFAULT_SETTINGS = {
 
 function readSettings() {
   try {
-    if (!fs.existsSync(SETTINGS_FILE)) {
+    const settingsFile = getSettingsFile();
+    if (!fs.existsSync(settingsFile)) {
       return DEFAULT_SETTINGS;
     }
-    const raw = fs.readFileSync(SETTINGS_FILE, 'utf-8');
+    const raw = fs.readFileSync(settingsFile, 'utf-8');
     return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch {
     return DEFAULT_SETTINGS;
@@ -29,10 +37,12 @@ function readSettings() {
 }
 
 function writeSettings(data: typeof DEFAULT_SETTINGS) {
-  if (!fs.existsSync(SETTINGS_DIR)) {
-    fs.mkdirSync(SETTINGS_DIR, { recursive: true });
+  const settingsDir = getSettingsDir();
+  const settingsFile = getSettingsFile();
+  if (!fs.existsSync(settingsDir)) {
+    fs.mkdirSync(settingsDir, { recursive: true });
   }
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  fs.writeFileSync(settingsFile, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 export async function GET() {

@@ -31,6 +31,45 @@ interface Settings {
   [key: string]: unknown;
 }
 
+interface AppPathHealth {
+  configured: boolean;
+  available: boolean;
+  path: string;
+  details: string;
+}
+
+interface AppUrlHealth {
+  configured: boolean;
+  online: boolean;
+  url: string;
+  details: string;
+}
+
+interface AppConfigState {
+  workspaceDir: string;
+  obsidianVaultPath: string;
+  khojUrl: string;
+  khojApiKey: string;
+  tokenLogPath: string;
+  usageCachePath: string;
+  graphifyDir: string;
+}
+
+interface AppSettingsResponse {
+  config: AppConfigState;
+  health: {
+    workspaceDir: AppPathHealth;
+    tokenLogPath: AppPathHealth;
+    usageCachePath: AppPathHealth;
+    obsidianVaultPath: AppPathHealth;
+    graphifyDir: AppPathHealth;
+    khoj: AppUrlHealth;
+  };
+  supportDir: string;
+  settingsFile: string;
+  migrated: boolean;
+}
+
 // ── Descriptions ───────────────────────────────────────────────────────────────
 
 const HOOK_DESCRIPTIONS: Record<string, string> = {
@@ -407,6 +446,197 @@ function WorkflowConfigSection() {
   );
 }
 
+function HealthBadge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: 'good' | 'warn' | 'bad';
+}) {
+  const styles =
+    tone === 'good'
+      ? 'border-nothing-green/30 text-nothing-green'
+      : tone === 'warn'
+        ? 'border-nothing-amber/30 text-nothing-amber'
+        : 'border-nothing-red/30 text-nothing-red';
+
+  return (
+    <span className={`font-mono text-[8px] uppercase tracking-[0.12em] border rounded px-1.5 py-0.5 ${styles}`}>
+      {label}
+    </span>
+  );
+}
+
+function AppIntegrationsSection({
+  response,
+  draft,
+  saving,
+  onChange,
+  onSave,
+}: {
+  response: AppSettingsResponse;
+  draft: AppConfigState;
+  saving: boolean;
+  onChange: (key: keyof AppConfigState, value: string) => void;
+  onSave: () => void;
+}) {
+  const rows: Array<{
+    key: keyof AppConfigState;
+    label: string;
+    description: string;
+    health?: AppPathHealth | AppUrlHealth;
+    secret?: boolean;
+  }> = [
+    {
+      key: 'workspaceDir',
+      label: 'Workspace Directory',
+      description: 'Used to locate second-brain telemetry and project-adjacent data.',
+      health: response.health.workspaceDir,
+    },
+    {
+      key: 'obsidianVaultPath',
+      label: 'Obsidian Vault',
+      description: 'Powers the Second Brain page and note counts.',
+      health: response.health.obsidianVaultPath,
+    },
+    {
+      key: 'khojUrl',
+      label: 'Khoj URL',
+      description: 'Optional semantic-search backend for Second Brain lookups.',
+      health: response.health.khoj,
+    },
+    {
+      key: 'khojApiKey',
+      label: 'Khoj API Key',
+      description: 'Stored locally and masked by default.',
+      secret: true,
+    },
+    {
+      key: 'tokenLogPath',
+      label: 'Token Log Path',
+      description: 'Used for agents, tools, and rate-limit history.',
+      health: response.health.tokenLogPath,
+    },
+    {
+      key: 'usageCachePath',
+      label: 'Usage Cache Path',
+      description: 'Backs the live 5-hour / 7-day usage widgets.',
+      health: response.health.usageCachePath,
+    },
+    {
+      key: 'graphifyDir',
+      label: 'Graphify Output',
+      description: 'Optional knowledge-graph export for the Second Brain page.',
+      health: response.health.graphifyDir,
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>App Integrations</CardTitle>
+        <div className="flex items-center gap-2">
+          <Badge variant="live">LOCAL CONFIG</Badge>
+          {response.migrated && <Badge variant="estimated">MIGRATED</Badge>}
+          {saving && (
+            <span className="font-mono text-[8px] uppercase tracking-wider text-nothing-text-dim animate-pulse">
+              saving…
+            </span>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="px-4 py-3 border-b border-nothing-border bg-nothing-surface2/30">
+          <p className="font-mono text-[9px] text-nothing-text-muted leading-relaxed">
+            These settings live in the app support folder so your machine-specific paths stay out of source.
+          </p>
+          <p className="font-mono text-[8px] text-nothing-text-dim mt-1 break-all">
+            {response.settingsFile}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 px-4 py-3 border-b border-nothing-border">
+          {[
+            { label: 'Workspace', value: response.health.workspaceDir },
+            { label: 'Token Log', value: response.health.tokenLogPath },
+            { label: 'Usage Cache', value: response.health.usageCachePath },
+            { label: 'Obsidian', value: response.health.obsidianVaultPath },
+            { label: 'Graphify', value: response.health.graphifyDir },
+            { label: 'Khoj', value: response.health.khoj },
+          ].map(({ label, value }) => {
+            const available = 'available' in value ? value.available : value.online;
+            const configured = value.configured;
+            const tone = available ? 'good' : configured ? 'warn' : 'bad';
+            const badgeLabel = available ? 'ready' : configured ? 'missing' : 'off';
+
+            return (
+              <div key={label} className="rounded-nothing border border-nothing-border bg-nothing-surface2/40 px-3 py-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-nothing-text-secondary">
+                    {label}
+                  </span>
+                  <HealthBadge label={badgeLabel} tone={tone} />
+                </div>
+                <p className="font-mono text-[8px] text-nothing-text-dim mt-1 leading-relaxed">
+                  {value.details}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {rows.map((row) => (
+          <div key={row.key} className="px-4 py-3 border-b border-nothing-border last:border-b-0">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div>
+                <p className="font-mono text-[10px] text-nothing-text">{row.label}</p>
+                <p className="font-mono text-[8px] text-nothing-text-dim mt-0.5 leading-relaxed">
+                  {row.description}
+                </p>
+              </div>
+              {row.health && (
+                <HealthBadge
+                  label={'available' in row.health ? (row.health.available ? 'ready' : row.health.configured ? 'missing' : 'off') : (row.health.online ? 'online' : row.health.configured ? 'offline' : 'off')}
+                  tone={'available' in row.health ? (row.health.available ? 'good' : row.health.configured ? 'warn' : 'bad') : (row.health.online ? 'good' : row.health.configured ? 'warn' : 'bad')}
+                />
+              )}
+            </div>
+            <input
+              type={row.secret ? 'password' : 'text'}
+              value={draft[row.key]}
+              onChange={(event) => onChange(row.key, event.target.value)}
+              className="w-full font-mono text-[10px] text-nothing-text bg-nothing-surface2 border border-nothing-border rounded-nothing px-3 py-2 focus:outline-none focus:border-nothing-border2"
+              placeholder={row.secret ? 'Enter a new key to replace the stored value' : ''}
+            />
+            {row.health && (
+              <p className="font-mono text-[8px] text-nothing-text-dim mt-1 break-all">
+                {'path' in row.health ? row.health.path || row.health.details : row.health.url || row.health.details}
+              </p>
+            )}
+          </div>
+        ))}
+
+        <div className="px-4 py-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-nothing-text-dim">
+              Support Directory
+            </p>
+            <p className="font-mono text-[8px] text-nothing-text-dim mt-1 break-all">
+              {response.supportDir}
+            </p>
+          </div>
+          <button
+            onClick={onSave}
+            className="shrink-0 font-mono text-[9px] uppercase tracking-[0.12em] text-nothing-text border border-nothing-border rounded-nothing px-3 py-2 hover:bg-nothing-surface2 transition-colors"
+          >
+            Save Integrations
+          </button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ── Menubar Settings Types ─────────────────────────────────────────────────────
 
 interface MenubarSettings {
@@ -569,8 +799,33 @@ function MenubarSettingsSection({
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [appSettings, setAppSettings] = useState<AppSettingsResponse | null>(null);
+  const [appSettingsDraft, setAppSettingsDraft] = useState<AppConfigState | null>(null);
+  const [appSettingsSaving, setAppSettingsSaving] = useState(false);
   const [menubarSettings, setMenubarSettings] = useState<MenubarSettings>(MENUBAR_DEFAULTS);
   const [menubarSaving, setMenubarSaving] = useState(false);
+
+  const saveAppSettings = useCallback(async () => {
+    if (!appSettingsDraft) return;
+    setAppSettingsSaving(true);
+    try {
+      const response = await fetch('/api/app-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(appSettingsDraft),
+      });
+
+      if (response.ok) {
+        const next = (await response.json()) as AppSettingsResponse;
+        setAppSettings(next);
+        setAppSettingsDraft(next.config);
+      }
+    } catch (error) {
+      console.error('Failed to save app settings', error);
+    } finally {
+      setAppSettingsSaving(false);
+    }
+  }, [appSettingsDraft]);
 
   const saveMenubarSettings = useCallback(async (next: MenubarSettings) => {
     setMenubarSettings(next);
@@ -581,6 +836,9 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(next),
       });
+      if (window.electronAPI) {
+        await window.electronAPI.invoke('menubar:setSettings', next);
+      }
     } catch (e) {
       console.error('Failed to save menubar settings', e);
     } finally {
@@ -591,12 +849,18 @@ export default function SettingsPage() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const [settingsRes, menubarRes] = await Promise.all([
+        const [settingsRes, menubarRes, appSettingsRes] = await Promise.all([
           fetch('/api/settings'),
           fetch('/api/menubar-settings'),
+          fetch('/api/app-settings'),
         ]);
         if (settingsRes.ok) setSettings(await settingsRes.json());
         if (menubarRes.ok) setMenubarSettings(await menubarRes.json());
+        if (appSettingsRes.ok) {
+          const next = (await appSettingsRes.json()) as AppSettingsResponse;
+          setAppSettings(next);
+          setAppSettingsDraft(next.config);
+        }
       } catch (e) {
         console.error('Failed to fetch settings', e);
       } finally {
@@ -612,6 +876,7 @@ export default function SettingsPage() {
     return (
       <div className="space-y-4 max-w-3xl">
         <Skeleton className="h-16" />
+        <Skeleton className="h-56" />
         <Skeleton className="h-28" />
         <Skeleton className="h-40" />
         <Skeleton className="h-48" />
@@ -698,6 +963,21 @@ export default function SettingsPage() {
           saving={menubarSaving}
         />
       </motion.div>
+
+      {/* Local app configuration */}
+      {appSettings && appSettingsDraft && (
+        <motion.div variants={fadeUp}>
+          <AppIntegrationsSection
+            response={appSettings}
+            draft={appSettingsDraft}
+            saving={appSettingsSaving}
+            onChange={(key, value) =>
+              setAppSettingsDraft((current) => (current ? { ...current, [key]: value } : current))
+            }
+            onSave={saveAppSettings}
+          />
+        </motion.div>
+      )}
 
       {/* Model section */}
       <motion.div variants={fadeUp}>
