@@ -33,6 +33,12 @@ const GRAPHIFY_GREEN = '#10B981';
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
 interface SecondBrainData {
+  integrations: {
+    workspace: { configured: boolean; available: boolean; path: string; details: string };
+    obsidian: { configured: boolean; available: boolean; path: string; details: string };
+    graphify: { configured: boolean; available: boolean; path: string; details: string };
+    khoj: { configured: boolean; online: boolean; url: string; details: string };
+  };
   vault: { notes: number; decisions: number; sessions: number; projects: number };
   graphify: { nodes: number; edges: number; communities: number };
   khoj: { online: boolean; avgLatencyMs: number; totalResults: number };
@@ -182,7 +188,15 @@ function StatusDot({ online, color }: { online: boolean; color: string }) {
 
 // ─── System Cards ────────────────────────────────────────────────────────────────
 
-function ObsidianCard({ vault, delay }: { vault: SecondBrainData['vault']; delay: number }) {
+function ObsidianCard({
+  vault,
+  integration,
+  delay,
+}: {
+  vault: SecondBrainData['vault'];
+  integration: SecondBrainData['integrations']['obsidian'];
+  delay: number;
+}) {
   return (
     <motion.div {...fadeUp(delay)}>
       <motion.div
@@ -199,7 +213,7 @@ function ObsidianCard({ vault, delay }: { vault: SecondBrainData['vault']; delay
                   Obsidian Vault
                 </span>
               </div>
-              <StatusDot online={true} color={OBSIDIAN_PURPLE} />
+              <StatusDot online={integration.available} color={OBSIDIAN_PURPLE} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
@@ -216,7 +230,9 @@ function ObsidianCard({ vault, delay }: { vault: SecondBrainData['vault']; delay
             </div>
             <div className="mt-3 pt-3 border-t border-nothing-border">
               <p className="font-mono text-[8px] text-nothing-text-dim uppercase tracking-[0.1em]">
-                Hook: per-turn keyword grep · session start inject
+                {integration.available
+                  ? 'Hook: per-turn keyword grep · session start inject'
+                  : integration.details}
               </p>
             </div>
           </CardContent>
@@ -226,7 +242,17 @@ function ObsidianCard({ vault, delay }: { vault: SecondBrainData['vault']; delay
   );
 }
 
-function KhojCard({ khoj, telemetry, delay }: { khoj: SecondBrainData['khoj']; telemetry: SecondBrainData['telemetry']; delay: number }) {
+function KhojCard({
+  khoj,
+  telemetry,
+  integration,
+  delay,
+}: {
+  khoj: SecondBrainData['khoj'];
+  telemetry: SecondBrainData['telemetry'];
+  integration: SecondBrainData['integrations']['khoj'];
+  delay: number;
+}) {
   return (
     <motion.div {...fadeUp(delay)}>
       <motion.div
@@ -243,7 +269,7 @@ function KhojCard({ khoj, telemetry, delay }: { khoj: SecondBrainData['khoj']; t
                   Khoj / Gemma
                 </span>
               </div>
-              <StatusDot online={khoj.online} color={KHOJ_ORANGE} />
+              <StatusDot online={integration.online} color={KHOJ_ORANGE} />
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -268,12 +294,14 @@ function KhojCard({ khoj, telemetry, delay }: { khoj: SecondBrainData['khoj']; t
               </div>
               <div>
                 <p className="font-mono text-[8px] uppercase tracking-[0.12em] text-nothing-text-dim mb-0.5">Model</p>
-                <p className="font-mono text-[10px] text-nothing-text-secondary">Gemma 4 · localhost:42110</p>
+                <p className="font-mono text-[10px] text-nothing-text-secondary">
+                  {integration.url || 'Not configured'}
+                </p>
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-nothing-border">
               <p className="font-mono text-[8px] text-nothing-text-dim uppercase tracking-[0.1em]">
-                Ollama backend · vector embeddings
+                {integration.details}
               </p>
             </div>
           </CardContent>
@@ -283,7 +311,15 @@ function KhojCard({ khoj, telemetry, delay }: { khoj: SecondBrainData['khoj']; t
   );
 }
 
-function GraphifyCard({ graphify, delay }: { graphify: SecondBrainData['graphify']; delay: number }) {
+function GraphifyCard({
+  graphify,
+  integration,
+  delay,
+}: {
+  graphify: SecondBrainData['graphify'];
+  integration: SecondBrainData['integrations']['graphify'];
+  delay: number;
+}) {
   return (
     <motion.div {...fadeUp(delay)}>
       <motion.div
@@ -300,7 +336,7 @@ function GraphifyCard({ graphify, delay }: { graphify: SecondBrainData['graphify
                   Graphify
                 </span>
               </div>
-              <StatusDot online={graphify.nodes > 0} color={GRAPHIFY_GREEN} />
+              <StatusDot online={integration.available && graphify.nodes > 0} color={GRAPHIFY_GREEN} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
@@ -320,7 +356,9 @@ function GraphifyCard({ graphify, delay }: { graphify: SecondBrainData['graphify
             </div>
             <div className="mt-3 pt-3 border-t border-nothing-border">
               <p className="font-mono text-[8px] text-nothing-text-dim uppercase tracking-[0.1em]">
-                Code structure graph · community detection
+                {integration.available
+                  ? 'Code structure graph · community detection'
+                  : integration.details}
               </p>
             </div>
           </CardContent>
@@ -348,16 +386,36 @@ function EmptyState({ message }: { message: string }) {
 export default function SecondBrainPage() {
   const [data, setData] = useState<SecondBrainData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/second-brain')
-      .then(r => r.json())
-      .then(setData)
-      .catch(console.error)
+      .then(r => r.json().then(json => ({ ok: r.ok, json })))
+      .then(({ ok, json }) => {
+        if (!ok) {
+          setError(json?.error ?? 'Failed to load second brain data');
+        } else {
+          setData(json);
+        }
+      })
+      .catch(e => setError(e?.message ?? 'Network error'))
       .finally(() => setLoading(false));
   }, []);
 
-  const hasTopFiles = data && data.topFiles.length > 0;
+  const hasTopFiles = data && data.topFiles && data.topFiles.length > 0;
+
+  if (!loading && error) {
+    return (
+      <div className="flex-1 overflow-y-auto bg-nothing-bg">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="rounded-nothing border border-nothing-border bg-nothing-surface p-6 text-center space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-nothing-text-dim">Second Brain Unavailable</p>
+            <p className="font-mono text-[9px] text-nothing-text-dim">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto bg-nothing-bg">
@@ -378,6 +436,34 @@ export default function SecondBrainPage() {
           </p>
         </motion.div>
 
+        {data && (
+          <motion.div {...fadeUp(0.03)}>
+            <div className="rounded-nothing border border-nothing-border bg-nothing-surface2/30 px-4 py-3">
+              <div className="flex flex-wrap items-center gap-3">
+                {[
+                  { label: 'Workspace', ok: data.integrations.workspace.available, details: data.integrations.workspace.details },
+                  { label: 'Obsidian', ok: data.integrations.obsidian.available, details: data.integrations.obsidian.details },
+                  { label: 'Graphify', ok: data.integrations.graphify.available, details: data.integrations.graphify.details },
+                  { label: 'Khoj', ok: data.integrations.khoj.online, details: data.integrations.khoj.details },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: item.ok ? '#4A9E5C' : '#D4A843' }}
+                    />
+                    <span className="font-mono text-[8px] uppercase tracking-[0.12em] text-nothing-text-secondary">
+                      {item.label}
+                    </span>
+                    <span className="font-mono text-[8px] text-nothing-text-dim">
+                      {item.details}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Row 1: System Status Cards */}
         <div className="grid grid-cols-3 gap-4">
           {loading ? (
@@ -388,9 +474,9 @@ export default function SecondBrainPage() {
             </>
           ) : data ? (
             <>
-              <ObsidianCard vault={data.vault} delay={0.05} />
-              <KhojCard khoj={data.khoj} telemetry={data.telemetry} delay={0.1} />
-              <GraphifyCard graphify={data.graphify} delay={0.15} />
+              <ObsidianCard vault={data.vault} integration={data.integrations.obsidian} delay={0.05} />
+              <KhojCard khoj={data.khoj} telemetry={data.telemetry} integration={data.integrations.khoj} delay={0.1} />
+              <GraphifyCard graphify={data.graphify} integration={data.integrations.graphify} delay={0.15} />
             </>
           ) : null}
         </div>
@@ -642,7 +728,7 @@ export default function SecondBrainPage() {
             </CardHeader>
             <CardContent>
               {!hasTopFiles ? (
-                <EmptyState message="No data yet — files will appear here once hooks start matching vault content." />
+                <EmptyState message="No matches yet — files appear here once your hooks or vault integrations start injecting context." />
               ) : (
                 <ChartWrapper height={Math.max(200, data!.topFiles.length * 32)}>
                   <BarChart

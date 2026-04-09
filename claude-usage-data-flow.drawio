@@ -1,286 +1,312 @@
 <mxfile host="Electron" version="29.6.6">
-  <diagram id="claude-usage-data-flow-v3" name="Data Flow">
-    <mxGraphModel dx="2000" dy="1300" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1500" background="#000000" math="0" shadow="0">
+  <diagram id="claude-usage-data-flow-v4" name="Data Flow">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1800" math="0" shadow="0" background="#FFFFFF">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- Title -->
-        <mxCell id="title" vertex="1" parent="1" value="Claude Usage Electron — Architecture" style="text;html=1;fontSize=20;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#E8E8E8;align=left;">
-          <mxGeometry x="40" y="24" width="700" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="subtitle" vertex="1" parent="1" value="Data Sources → claude-reader.ts → API Routes → Electron Shell → UI" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#666666;align=left;">
-          <mxGeometry x="40" y="52" width="800" height="18" as="geometry" />
+        <mxCell id="title" value="Claude Usage Dashboard &amp;mdash; How Data Flows" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=28;fontStyle=1;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="400" y="30" width="1600" height="44" as="geometry" />
         </mxCell>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- COLUMN 1: DATA SOURCES -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="grp_sources" vertex="1" parent="1" value="Data Sources" style="swimlane;startSize=34;fillColor=#0a0a0a;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontStyle=1;fontSize=13;fontColor=#4A9E5C;rounded=1;arcSize=3;swimlaneLine=1;align=left;spacingLeft=12;">
-          <mxGeometry x="40" y="90" width="360" height="580" as="geometry" />
+        <mxCell id="subtitle" value="Where the data lives, how it gets processed, and what you see on screen" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontColor=#6B7280;" vertex="1" parent="1">
+          <mxGeometry x="400" y="78" width="1600" height="30" as="geometry" />
         </mxCell>
 
-        <!-- token-log.jsonl -->
-        <mxCell id="src_tokenlog" vertex="1" parent="grp_sources" value="~/.claude/agents/token-log.jsonl&#xa;Agent task logs (Bento, Enzo, Jarvis)" style="shape=document;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=10;fontColor=#E8E8E8;size=0.1;rounded=1;">
-          <mxGeometry x="20" y="52" width="320" height="52" as="geometry" />
+        <mxCell id="col1-outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#93C5FD;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="580" height="990" as="geometry" />
         </mxCell>
 
-        <!-- Claude.ai cookies -->
-        <mxCell id="src_cookies" vertex="1" parent="grp_sources" value="Claude.ai Browser Cookies&#xa;Session auth for live usage scraping" style="shape=document;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=10;fontColor=#E8E8E8;size=0.1;rounded=1;">
-          <mxGeometry x="20" y="122" width="320" height="52" as="geometry" />
+        <mxCell id="col1-header" value="YOUR MAC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#93C5FD;strokeWidth=2;fontSize=18;fontStyle=1;fontColor=#1E3A5F;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="580" height="50" as="geometry" />
         </mxCell>
 
-        <!-- .env -->
-        <mxCell id="src_env" vertex="1" parent="grp_sources" value=".env Config File&#xa;SUPABASE_URL, TOKEN_LOG_PATH, etc." style="shape=document;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#666666;fontFamily=Space Grotesk;fontSize=10;fontColor=#E8E8E8;size=0.1;rounded=1;">
-          <mxGeometry x="20" y="192" width="320" height="52" as="geometry" />
+        <mxCell id="col1-sub-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#93C5FD;strokeWidth=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="200" width="540" height="570" as="geometry" />
         </mxCell>
 
-        <!-- Supabase group -->
-        <mxCell id="grp_supabase" vertex="1" parent="grp_sources" value="Supabase (optional)" style="swimlane;startSize=28;fillColor=#0d1a0d;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontStyle=1;fontSize=11;fontColor=#4A9E5C;rounded=1;arcSize=6;swimlaneLine=1;">
-          <mxGeometry x="20" y="270" width="320" height="160" as="geometry" />
-        </mxCell>
-        <mxCell id="sb_cache" vertex="1" parent="grp_supabase" value="claude_usage_cache&#xa;5h/7d usage percentages" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;size=8;">
-          <mxGeometry x="10" y="36" width="140" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="sb_agents" vertex="1" parent="grp_supabase" value="agent_token_log&#xa;Agent task persistence" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;size=8;">
-          <mxGeometry x="170" y="36" width="140" height="100" as="geometry" />
+        <mxCell id="col1-sub-title" value="Claude Code Local Files" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=15;fontStyle=1;fontColor=#1E3A5F;" vertex="1" parent="1">
+          <mxGeometry x="80" y="206" width="540" height="26" as="geometry" />
         </mxCell>
 
-        <!-- Claude Code Hooks -->
-        <mxCell id="grp_hooks" vertex="1" parent="grp_sources" value="Claude Code Hooks" style="swimlane;startSize=28;fillColor=#1a110a;strokeColor=#D4A843;fontFamily=Space Grotesk;fontStyle=1;fontSize=11;fontColor=#D4A843;rounded=1;arcSize=6;swimlaneLine=1;">
-          <mxGeometry x="20" y="456" width="320" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="hook_submit" vertex="1" parent="grp_hooks" value="UserPromptSubmit hook" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="34" width="140" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="hook_stop" vertex="1" parent="grp_hooks" value="Stop hook" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="168" y="34" width="140" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="hook_note" vertex="1" parent="grp_hooks" value="Both write to token-log.jsonl" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#666666;align=center;">
-          <mxGeometry x="10" y="70" width="300" height="14" as="geometry" />
+        <mxCell id="col1-sub-subtitle" value="Stored in your home folder &amp;mdash; created automatically by Claude Code" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#6B7280;" vertex="1" parent="1">
+          <mxGeometry x="80" y="232" width="540" height="22" as="geometry" />
         </mxCell>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- COLUMN 2: BACKEND -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="grp_backend" vertex="1" parent="1" value="Backend" style="swimlane;startSize=34;fillColor=#0a0a0a;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontStyle=1;fontSize=13;fontColor=#5B9BF6;rounded=1;arcSize=3;swimlaneLine=1;align=left;spacingLeft=12;">
-          <mxGeometry x="480" y="90" width="520" height="580" as="geometry" />
+        <mxCell id="item-cmd" value="&lt;b&gt;Command History&lt;/b&gt;&#xa;Every prompt you&#39;ve typed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="264" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- claude-reader.ts -->
-        <mxCell id="reader_label" vertex="1" parent="grp_backend" value="src/lib/claude-reader.ts — core data engine" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#5B9BF6;">
-          <mxGeometry x="20" y="44" width="480" height="16" as="geometry" />
-        </mxCell>
-        <mxCell id="reader_box" vertex="1" parent="grp_backend" value="Reads token-log.jsonl • Queries Supabase • Scrapes claude.ai via browser session cookies • Parses JSONL • Calculates usage percentages" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;strokeWidth=2;fontFamily=Space Grotesk;fontSize=10;fontColor=#E8E8E8;">
-          <mxGeometry x="20" y="64" width="480" height="44" as="geometry" />
+        <mxCell id="item-tokens" value="&lt;b&gt;Token Costs&lt;/b&gt;&#xa;What each session cost" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="322" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- API Routes label -->
-        <mxCell id="routes_label" vertex="1" parent="grp_backend" value="Next.js API Routes" style="text;html=1;fontSize=11;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#5B9BF6;">
-          <mxGeometry x="20" y="124" width="300" height="16" as="geometry" />
+        <mxCell id="item-activity" value="&lt;b&gt;Activity Stats&lt;/b&gt;&#xa;When you use Claude (by day and hour)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="380" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Routes grid: 2 cols -->
-        <mxCell id="r_usage_live" vertex="1" parent="grp_backend" value="/api/usage-live&#xa;Live rate limit data from claude.ai" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="20" y="146" width="228" height="44" as="geometry" />
-        </mxCell>
-        <mxCell id="r_agents" vertex="1" parent="grp_backend" value="/api/agents&#xa;Agent task logs from token-log.jsonl" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="266" y="146" width="234" height="44" as="geometry" />
-        </mxCell>
-        <mxCell id="r_sessions" vertex="1" parent="grp_backend" value="/api/sessions&#xa;Session timeline data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="20" y="198" width="228" height="44" as="geometry" />
-        </mxCell>
-        <mxCell id="r_tools" vertex="1" parent="grp_backend" value="/api/tools&#xa;Tool usage frequency" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="266" y="198" width="234" height="44" as="geometry" />
-        </mxCell>
-        <mxCell id="r_settings" vertex="1" parent="grp_backend" value="/api/settings&#xa;App config read/write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="20" y="250" width="228" height="44" as="geometry" />
-        </mxCell>
-        <mxCell id="r_second_brain" vertex="1" parent="grp_backend" value="/api/second-brain&#xa;Obsidian vault viewer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="266" y="250" width="234" height="44" as="geometry" />
+        <mxCell id="item-sessions" value="&lt;b&gt;Session Summaries&lt;/b&gt;&#xa;What happened in each session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="438" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Next.js server note -->
-        <mxCell id="nextjs_note" vertex="1" parent="grp_backend" value="Next.js App Router — started as child process on random port by Electron main process" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#333333;fontFamily=Space Grotesk;fontSize=9;fontColor=#666666;fontStyle=2;">
-          <mxGeometry x="20" y="310" width="480" height="28" as="geometry" />
+        <mxCell id="item-projects" value="&lt;b&gt;Project Data&lt;/b&gt;&#xa;Full conversation logs (tokens, models, tools used per session)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="496" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- COLUMN 3: ELECTRON SHELL -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="grp_electron" vertex="1" parent="1" value="Electron Shell" style="swimlane;startSize=34;fillColor=#0a0a0a;strokeColor=#D4A843;fontFamily=Space Grotesk;fontStyle=1;fontSize=13;fontColor=#D4A843;rounded=1;arcSize=3;swimlaneLine=1;align=left;spacingLeft=12;">
-          <mxGeometry x="1090" y="90" width="420" height="260" as="geometry" />
+        <mxCell id="item-plans" value="&lt;b&gt;Plans&lt;/b&gt;&#xa;Implementation plans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="554" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Main process -->
-        <mxCell id="el_main" vertex="1" parent="grp_electron" value="Main Process" style="swimlane;startSize=26;fillColor=#111111;strokeColor=#D4A843;fontFamily=Space Grotesk;fontStyle=1;fontSize=10;fontColor=#D4A843;rounded=1;arcSize=6;">
-          <mxGeometry x="16" y="44" width="388" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="el_bw_dash" vertex="1" parent="el_main" value="BrowserWindow&#xa;Dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1500;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="32" width="172" height="52" as="geometry" />
-        </mxCell>
-        <mxCell id="el_tray_bw" vertex="1" parent="el_main" value="Tray + BrowserWindow&#xa;Menubar Popup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1500;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="198" y="32" width="180" height="52" as="geometry" />
+        <mxCell id="item-settings" value="&lt;b&gt;Settings&lt;/b&gt;&#xa;Your model, hooks, and plugins config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#93C5FD;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="612" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- IPC -->
-        <mxCell id="el_ipc" vertex="1" parent="grp_electron" value="IPC Channels: menubar:openDashboard • menubar:getSettings • menubar:setSettings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#666666;fontFamily=Space Grotesk;fontSize=9;fontColor=#999999;fontStyle=2;">
-          <mxGeometry x="16" y="156" width="388" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="el_child" vertex="1" parent="grp_electron" value="Spawns Next.js server as child process on random port" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#666666;fontFamily=Space Grotesk;fontSize=9;fontColor=#999999;fontStyle=2;">
-          <mxGeometry x="16" y="196" width="388" height="28" as="geometry" />
+        <mxCell id="agent-logs-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#6EE7B7;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="796" width="540" height="304" as="geometry" />
         </mxCell>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- COLUMN 4: UI OUTPUT -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="grp_ui" vertex="1" parent="1" value="UI Output" style="swimlane;startSize=34;fillColor=#0a0a0a;strokeColor=#E8E8E8;fontFamily=Space Grotesk;fontStyle=1;fontSize=13;fontColor=#E8E8E8;rounded=1;arcSize=3;swimlaneLine=1;align=left;spacingLeft=12;">
-          <mxGeometry x="1600" y="90" width="380" height="580" as="geometry" />
+        <mxCell id="agent-logs-header" value="Your Agent Logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#6EE7B7;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#065F46;" vertex="1" parent="1">
+          <mxGeometry x="80" y="796" width="540" height="40" as="geometry" />
         </mxCell>
 
-        <!-- Dashboard -->
-        <mxCell id="grp_dash" vertex="1" parent="grp_ui" value="Dashboard  —  (dashboard) route group" style="swimlane;startSize=28;fillColor=#111111;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontStyle=1;fontSize=10;fontColor=#5B9BF6;rounded=1;arcSize=6;">
-          <mxGeometry x="16" y="44" width="348" height="370" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_overview" vertex="1" parent="grp_dash" value="Overview — rate limit bars, key metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="36" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_ratelimits" vertex="1" parent="grp_dash" value="Rate Limits — 5h/7d usage meters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="72" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_sessions" vertex="1" parent="grp_dash" value="Sessions — session timeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="108" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_tools" vertex="1" parent="grp_dash" value="Tools — tool usage frequency charts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="144" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_sb" vertex="1" parent="grp_dash" value="Second Brain — Obsidian vault viewer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="180" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_settings" vertex="1" parent="grp_dash" value="Settings — model, hooks, env vars" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#5B9BF6;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="216" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="pg_agents" vertex="1" parent="grp_dash" value="Agents — Bento / Enzo / Jarvis task logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a11;strokeColor=#D4A843;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="252" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="dash_note" vertex="1" parent="grp_dash" value="Next.js App Router  |  Server + Client Components" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#444444;align=center;">
-          <mxGeometry x="10" y="328" width="328" height="14" as="geometry" />
+        <mxCell id="item-agent-task" value="&lt;b&gt;Agent Task Log&lt;/b&gt;&#xa;What your agents did" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="846" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- Menubar Popup -->
-        <mxCell id="grp_menubar" vertex="1" parent="grp_ui" value="Menubar Popup  —  /menubar route" style="swimlane;startSize=28;fillColor=#111111;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontStyle=1;fontSize=10;fontColor=#4A9E5C;rounded=1;arcSize=6;">
-          <mxGeometry x="16" y="434" width="348" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="mb_desc" vertex="1" parent="grp_menubar" value="Nothing UI  |  360×480 frameless window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a0a;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="36" width="328" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="mb_content" vertex="1" parent="grp_menubar" value="Compact 5h/7d bars + recent agent activity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0a0a0a;strokeColor=#4A9E5C;fontFamily=Space Grotesk;fontSize=9;fontColor=#E8E8E8;">
-          <mxGeometry x="10" y="72" width="328" height="28" as="geometry" />
+        <mxCell id="item-rate-snap" value="&lt;b&gt;Rate Limit Snapshot&lt;/b&gt;&#xa;Your current usage % (local backup)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="100" y="904" width="500" height="50" as="geometry" />
         </mxCell>
 
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- ARROWS -->
-        <!-- ═══════════════════════════════════════════════ -->
+        <mxCell id="item-poller" value="&lt;i&gt;Usage Poller &amp;mdash; runs every 2 min, checks your Claude rate limits&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#6EE7B7;strokeWidth=1;dashed=1;fontSize=11;fontColor=#065F46;align=center;" vertex="1" parent="1">
+          <mxGeometry x="100" y="962" width="500" height="44" as="geometry" />
+        </mxCell>
 
-        <!-- token-log → claude-reader -->
-        <mxCell id="arr_tokenlog_reader" edge="1" parent="1" source="src_tokenlog" target="reader_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4A9E5C;strokeWidth=2;fontFamily=Space Grotesk;fontSize=9;fontColor=#4A9E5C;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;">
+        <mxCell id="col2-outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#6EE7B7;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="730" y="130" width="580" height="990" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col2-header" value="DATA PROCESSING ENGINE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D1FAE5;strokeColor=#6EE7B7;strokeWidth=2;fontSize=18;fontStyle=1;fontColor=#065F46;" vertex="1" parent="1">
+          <mxGeometry x="730" y="130" width="580" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col2-subtitle" value="Reads all your local files and cloud data, then serves it to the dashboard pages" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#6B7280;" vertex="1" parent="1">
+          <mxGeometry x="730" y="188" width="580" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc1" value="Read Command History" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="224" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc2" value="Calculate Token Costs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="278" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc3" value="Build Activity Heatmap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="332" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc4" value="Parse Session Summaries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="386" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc5" value="Analyze Projects (tokens, cost, models per project)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="440" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc6" value="Load Plans" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="494" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc7" value="Read Settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="548" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc8" value="Count Tool Usage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="602" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc9" value="Track Agent Activity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="656" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="proc10" value="Fetch Live Rate Limits (from Supabase)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6EE7B7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="750" y="710" width="540" height="46" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col2-note" value="&lt;i&gt;All processing happens on your Mac &amp;mdash; nothing is sent to external servers&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#065F46;" vertex="1" parent="1">
+          <mxGeometry x="730" y="778" width="580" height="36" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col3-outer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF5F5;strokeColor=#FCA5A5;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="130" width="580" height="990" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col3-header" value="DASHBOARD APP (what you see)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#FCA5A5;strokeWidth=2;fontSize=18;fontStyle=1;fontColor=#7F1D1D;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="130" width="580" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="col3-subtitle" value="10 pages inside a native Mac app window with sidebar navigation and animations" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#6B7280;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="188" width="580" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-overview" value="&lt;b&gt;Overview&lt;/b&gt; &amp;mdash; Live rate limit bars, key metrics, 7-day chart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="224" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-projects" value="&lt;b&gt;Projects&lt;/b&gt; &amp;mdash; Your projects with tokens, cost, and model breakdown" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="282" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-sessions" value="&lt;b&gt;Sessions&lt;/b&gt; &amp;mdash; Timeline of what happened in each coding session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="340" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-costs" value="&lt;b&gt;Costs&lt;/b&gt; &amp;mdash; How much you&#39;re spending, broken down by model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="398" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-tools" value="&lt;b&gt;Tools&lt;/b&gt; &amp;mdash; Which tools Claude uses most (Read, Write, Bash, etc.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="456" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-activity" value="&lt;b&gt;Activity&lt;/b&gt; &amp;mdash; GitHub-style heatmap showing when you code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="514" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-history" value="&lt;b&gt;History&lt;/b&gt; &amp;mdash; Searchable list of every command you&#39;ve run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="572" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-plans" value="&lt;b&gt;Plans&lt;/b&gt; &amp;mdash; Your saved implementation plans with formatting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="630" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-agents" value="&lt;b&gt;Agents&lt;/b&gt; &amp;mdash; What your agents have been doing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="688" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="page-settings" value="&lt;b&gt;Settings&lt;/b&gt; &amp;mdash; Your Claude model, hooks, env vars, and plugins" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FCA5A5;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="746" width="540" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="menubar-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F3FF;strokeColor=#C4B5FD;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1160" width="580" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="menubar-header" value="Menu Bar Widget" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE9FE;strokeColor=#C4B5FD;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#4C1D95;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1160" width="580" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="menubar-desc1" value="Shows your rate limit bars in the Mac menu bar (the little icon at the top of your screen)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C4B5FD;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1210" width="540" height="52" as="geometry" />
+        </mxCell>
+
+        <mxCell id="menubar-btn" value="&apos;Open Dashboard&apos; button launches the full Electron app" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C4B5FD;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1270" width="540" height="52" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cloud-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#FCD34D;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="730" y="1160" width="580" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cloud-header" value="CLOUD (Supabase Database)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#FCD34D;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#78350F;" vertex="1" parent="1">
+          <mxGeometry x="730" y="1160" width="580" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cloud-subtitle" value="Accessible from any device &amp;mdash; your work laptop, phone, etc." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#6B7280;" vertex="1" parent="1">
+          <mxGeometry x="730" y="1206" width="580" height="22" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-ratelimits" value="&lt;b&gt;Live Rate Limits&lt;/b&gt;&#xa;How much of your 5-hour and 7-day Claude quota you&#39;ve used (updated every 2 min)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FFFFFF;strokeColor=#FCD34D;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+          <mxGeometry x="750" y="1234" width="260" height="84" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-agenttokens" value="&lt;b&gt;Agent Token Usage&lt;/b&gt;&#xa;How many tokens each agent burned" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FFFFFF;strokeColor=#FCD34D;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="1234" width="260" height="84" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db-toolevents" value="&lt;b&gt;Tool Call Events&lt;/b&gt;&#xa;Which tools used and when" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FFFFFF;strokeColor=#FCD34D;strokeWidth=2;fontSize=11;align=center;" vertex="1" parent="1">
+          <mxGeometry x="750" y="1328" width="260" height="76" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cloud-note" value="&lt;i&gt;The usage poller writes here every 2 minutes&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=11;fontColor=#92400E;" vertex="1" parent="1">
+          <mxGeometry x="730" y="1412" width="580" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="howapp-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#D1D5DB;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="1160" width="580" height="280" as="geometry" />
+        </mxCell>
+
+        <mxCell id="howapp-header" value="HOW THE APP RUNS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#D1D5DB;strokeWidth=2;fontSize=14;fontStyle=1;fontColor=#374151;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="1160" width="580" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="howapp-1" value="Runs as a native Mac app (like Slack or VS Code). Opens its own window &amp;mdash; not in your browser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D1D5DB;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="1210" width="540" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="howapp-2" value="In development: runs on localhost:3099. When packaged: self-contained app with built-in server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D1D5DB;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="1280" width="540" height="62" as="geometry" />
+        </mxCell>
+
+        <mxCell id="howapp-3" value="Builds to a .dmg installer you can drag to Applications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D1D5DB;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="1350" width="540" height="52" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-container" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F9FAFB;strokeColor=#D1D5DB;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1500" width="1920" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-title" value="How to read this diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=15;fontStyle=1;fontColor=#374151;" vertex="1" parent="1">
+          <mxGeometry x="60" y="1506" width="1920" height="28" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-solid-desc" value="Solid arrow &amp;rarr; Reads directly from your disk" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1548" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-dashed-desc" value="Dashed arrow --&gt; Goes over the network (internet)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="1548" width="360" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-rect-shape" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="1548" width="50" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-rect-desc" value="Rectangle = a file on your Mac" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="1546" width="300" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-cyl-shape" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#FFFFFF;strokeColor=#374151;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="1542" width="50" height="36" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-cyl-desc" value="Cylinder = a cloud database table" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="1546" width="300" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arrow-col1-to-col2" value="reads files" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;strokeColor=#065F46;strokeWidth=2;endArrow=block;endFill=1;fontSize=13;fontColor=#065F46;fontStyle=1;" edge="1" source="col1-outer" target="col2-outer" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr_tokenlog_reader_lbl" vertex="1" parent="1" value="reads JSONL" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#4A9E5C;fontStyle=1;">
-          <mxGeometry x="408" y="148" width="80" height="16" as="geometry" />
-        </mxCell>
 
-        <!-- cookies → claude-reader -->
-        <mxCell id="arr_cookies_reader" edge="1" parent="1" source="src_cookies" target="reader_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D4A843;strokeWidth=2;fontFamily=Space Grotesk;fontSize=9;fontColor=#D4A843;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+        <mxCell id="arrow-col2-to-col3" value="serves data as JSON" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;strokeColor=#991B1B;strokeWidth=2;endArrow=block;endFill=1;fontSize=13;fontColor=#991B1B;fontStyle=1;" edge="1" source="col2-outer" target="col3-outer" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr_cookies_reader_lbl" vertex="1" parent="1" value="scrapes live usage" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#D4A843;fontStyle=1;">
-          <mxGeometry x="400" y="196" width="100" height="16" as="geometry" />
-        </mxCell>
 
-        <!-- supabase → claude-reader -->
-        <mxCell id="arr_sb_reader" edge="1" parent="1" source="grp_supabase" target="reader_box" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4A9E5C;strokeWidth=1.5;dashed=1;dashPattern=6 3;fontFamily=Space Grotesk;fontSize=9;fontColor=#4A9E5C;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;">
+        <mxCell id="arrow-menubar-to-dash" value="opens the app" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.3;entryY=1;entryDx=0;entryDy=0;strokeColor=#7C3AED;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=12;fontColor=#7C3AED;fontStyle=1;" edge="1" source="menubar-container" target="col3-outer" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr_sb_reader_lbl" vertex="1" parent="1" value="optional cache" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#4A9E5C;fontStyle=3;">
-          <mxGeometry x="412" y="390" width="80" height="16" as="geometry" />
-        </mxCell>
 
-        <!-- hooks → token-log (annotation) -->
-        <mxCell id="arr_hooks_tokenlog" edge="1" parent="1" source="grp_hooks" target="src_tokenlog" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D4A843;strokeWidth=1.5;dashed=1;dashPattern=4 3;fontFamily=Space Grotesk;fontSize=9;fontColor=#D4A843;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+        <mxCell id="arrow-engine-to-cloud" value="writes every 2 min" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#065F46;strokeWidth=2;endArrow=block;endFill=1;fontSize=12;fontColor=#065F46;fontStyle=1;" edge="1" source="col2-outer" target="cloud-container" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr_hooks_tokenlog_lbl" vertex="1" parent="1" value="writes" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#D4A843;fontStyle=1;">
-          <mxGeometry x="167" y="400" width="40" height="16" as="geometry" />
-        </mxCell>
 
-        <!-- backend → electron shell -->
-        <mxCell id="arr_backend_electron" edge="1" parent="1" source="grp_backend" target="grp_electron" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#D4A843;strokeWidth=2.5;fontFamily=Space Grotesk;fontSize=10;fontColor=#D4A843;fontStyle=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+        <mxCell id="arrow-cloud-to-engine" value="also reads rate limits" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.35;exitY=0;exitDx=0;exitDy=0;entryX=0.35;entryY=1;entryDx=0;entryDy=0;strokeColor=#92400E;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=12;fontColor=#92400E;fontStyle=1;" edge="1" source="cloud-container" target="col2-outer" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr_backend_electron_lbl" vertex="1" parent="1" value="JSON / HTTP" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#D4A843;fontStyle=1;">
-          <mxGeometry x="1020" y="220" width="70" height="16" as="geometry" />
-        </mxCell>
 
-        <!-- electron → dashboard -->
-        <mxCell id="arr_electron_dash" edge="1" parent="1" source="el_bw_dash" target="grp_dash" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#5B9BF6;strokeWidth=2;fontFamily=Space Grotesk;fontSize=9;fontColor=#5B9BF6;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;">
+        <mxCell id="arrow-engine-to-menubar" value="fetches live data" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#065F46;strokeWidth=2;endArrow=block;endFill=1;fontSize=12;fontColor=#065F46;fontStyle=1;" edge="1" source="col2-outer" target="menubar-container" parent="1">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="arr_electron_dash_lbl" vertex="1" parent="1" value="renders" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#5B9BF6;fontStyle=1;">
-          <mxGeometry x="1530" y="230" width="50" height="16" as="geometry" />
-        </mxCell>
-
-        <!-- electron → menubar -->
-        <mxCell id="arr_electron_mb" edge="1" parent="1" source="el_tray_bw" target="grp_menubar" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#4A9E5C;strokeWidth=2;fontFamily=Space Grotesk;fontSize=9;fontColor=#4A9E5C;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1560" y="171" />
-              <mxPoint x="1560" y="499" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="arr_electron_mb_lbl" vertex="1" parent="1" value="renders" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#4A9E5C;fontStyle=1;">
-          <mxGeometry x="1530" y="470" width="50" height="16" as="geometry" />
-        </mxCell>
-
-        <!-- ═══════════════════════════════════════════════ -->
-        <!-- LEGEND -->
-        <!-- ═══════════════════════════════════════════════ -->
-        <mxCell id="legend" vertex="1" parent="1" value="" style="swimlane;startSize=0;fillColor=#111111;strokeColor=#222222;rounded=1;arcSize=4;">
-          <mxGeometry x="480" y="740" width="600" height="72" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_title" vertex="1" parent="legend" value="Legend" style="text;html=1;fontSize=10;fontFamily=Space Grotesk;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#666666;">
-          <mxGeometry x="12" y="8" width="60" height="16" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_e1" edge="1" parent="legend" style="endArrow=classic;strokeColor=#4A9E5C;strokeWidth=2;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="12" y="38" as="sourcePoint" />
-            <mxPoint x="56" y="38" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="leg_t1" vertex="1" parent="legend" value="local file read" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#999999;">
-          <mxGeometry x="62" y="30" width="100" height="16" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_e2" edge="1" parent="legend" style="endArrow=classic;strokeColor=#D4A843;strokeWidth=2;dashed=1;dashPattern=6 3;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="178" y="38" as="sourcePoint" />
-            <mxPoint x="222" y="38" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="leg_t2" vertex="1" parent="legend" value="browser / scrape" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#999999;">
-          <mxGeometry x="228" y="30" width="110" height="16" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_e3" edge="1" parent="legend" style="endArrow=classic;strokeColor=#5B9BF6;strokeWidth=2.5;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="356" y="38" as="sourcePoint" />
-            <mxPoint x="400" y="38" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="leg_t3" vertex="1" parent="legend" value="JSON / HTTP render" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#999999;">
-          <mxGeometry x="406" y="30" width="120" height="16" as="geometry" />
-        </mxCell>
-        <mxCell id="leg_sub1" vertex="1" parent="legend" value="Green = data sources  |  Blue = API/app  |  Amber = Electron shell  |  White = UI output" style="text;html=1;fontSize=9;fontFamily=Space Grotesk;fillColor=none;strokeColor=none;fontColor=#444444;align=center;">
-          <mxGeometry x="12" y="52" width="576" height="14" as="geometry" />
         </mxCell>
 
       </root>

@@ -7,14 +7,15 @@ import os from 'os';
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let menubarWindow: BrowserWindow | null = null;
-let currentPort: number = 3099;
+let currentPort: number = 0;
 let trayRefreshTimer: NodeJS.Timeout | null = null;
 
 const isDev = !app.isPackaged;
-const DEV_PORT = 3099;
+const DEV_PORT = Number(process.env.CLAUDE_USAGE_PORT || 3099);
 
 // Settings file path
-const SETTINGS_DIR = path.join(os.homedir(), '.claude-usage-dashboard');
+const SETTINGS_DIR =
+  process.env.CLAUDE_USAGE_CONFIG_DIR || path.join(os.homedir(), '.claude-usage-dashboard');
 const SETTINGS_FILE = path.join(SETTINGS_DIR, 'menubar-settings.json');
 
 const DEFAULT_SETTINGS = {
@@ -67,12 +68,15 @@ async function updateTrayTitle() {
   try {
     const res = await fetch(`http://127.0.0.1:${currentPort}/api/usage-live`);
     if (!res.ok) return;
-    const data = await res.json() as { fiveHour?: number; sevenDay?: number } | null;
+    const data = await res.json() as { fiveHour?: number; sevenDay?: number; overage?: number } | null;
     if (!data) return;
     const settings = readSettings();
     const parts: string[] = [];
     if (settings.showFiveHour && data.fiveHour != null) parts.push(`5H: ${Math.round(data.fiveHour)}%`);
     if (settings.showSevenDay && data.sevenDay != null) parts.push(`7D: ${Math.round(data.sevenDay)}%`);
+    if (settings.showSonnet && data.overage != null && data.overage > 0) {
+      parts.push(`SON: ${Math.round(data.overage)}%`);
+    }
     tray.setTitle(parts.join(' | '));
   } catch {
     // silently ignore — server may not be ready yet
@@ -82,6 +86,19 @@ async function updateTrayTitle() {
 function startTrayRefresh(intervalSec: number) {
   if (trayRefreshTimer) clearInterval(trayRefreshTimer);
   trayRefreshTimer = setInterval(() => updateTrayTitle(), intervalSec * 1000);
+}
+
+function destroyTray() {
+  if (trayRefreshTimer) {
+    clearInterval(trayRefreshTimer);
+    trayRefreshTimer = null;
+  }
+  if (menubarWindow && !menubarWindow.isDestroyed()) {
+    menubarWindow.close();
+  }
+  menubarWindow = null;
+  tray?.destroy();
+  tray = null;
 }
 
 function createMenubarWindow(port: number) {
@@ -183,20 +200,28 @@ function createTray(port: number) {
   tray.on('right-click', () => {
     tray?.popUpContextMenu(buildContextMenu());
   });
+}
 
-  // Initial title + periodic refresh
-  setTimeout(() => updateTrayTitle(), 3000);
-  const settings = readSettings();
+function syncTrayWithSettings(settings = readSettings()) {
+  if (!settings.enabled || !settings.showInMenubar) {
+    destroyTray();
+    return;
+  }
+
+  if (!tray) {
+    createTray(currentPort);
+  }
+
   startTrayRefresh(settings.refreshInterval);
+  setTimeout(() => updateTrayTitle(), 300);
 }
 
 // IPC handlers
 ipcMain.handle('menubar:getSettings', () => readSettings());
 ipcMain.handle('menubar:setSettings', (_event, settings: Partial<typeof DEFAULT_SETTINGS>) => {
   writeSettings(settings);
-  // Re-apply refresh interval if changed
   const updated = readSettings();
-  startTrayRefresh(updated.refreshInterval);
+  syncTrayWithSettings(updated);
   return updated;
 });
 ipcMain.handle('menubar:openDashboard', () => {
@@ -259,7 +284,7 @@ async function createWindow() {
 
   mainWindow.loadURL(`http://127.0.0.1:${port}`);
 
-  if (isDev) {
+  if (isDev && process.env.ELECTRON_OPEN_DEVTOOLS === '1') {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
 
@@ -288,9 +313,7 @@ async function createWindow() {
   });
 
   // Create tray after window is set up
-  if (!tray) {
-    createTray(port);
-  }
+  syncTrayWithSettings();
 }
 
 app.whenReady().then(createWindow);
@@ -308,5 +331,5 @@ app.on('activate', () => {
 });
 
 app.on('before-quit', () => {
-  if (trayRefreshTimer) clearInterval(trayRefreshTimer);
+  destroyTray();
 });

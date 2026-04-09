@@ -2,7 +2,13 @@
 
 Real-time token usage monitoring for Claude Code power users.
 
-![Dashboard Overview](screenshots/overview.png)
+| Overview | Menubar Widget |
+|----------|---------------|
+| ![Overview](docs/screenshots/overview.png) | ![Menubar](docs/screenshots/menubar.png) |
+
+| Rate Limits | Tools |
+|-------------|-------|
+| ![Rate Limits](docs/screenshots/rate-limits.png) | ![Tools](docs/screenshots/tools.png) |
 
 ---
 
@@ -14,7 +20,7 @@ Real-time token usage monitoring for Claude Code power users.
 - Per-agent token breakdown and cost tracking
 - Session history and activity heatmaps
 - Tool usage analytics
-- Light/dark mode with Apple HIG-inspired design
+- Nothing UI design with light/dark mode
 - Configurable via settings page
 
 ---
@@ -30,8 +36,8 @@ Real-time token usage monitoring for Claude Code power users.
 ## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-usage-dashboard.git
-cd claude-usage-dashboard
+git clone https://github.com/eastonplace-ai/claude-subscription-usage-meter.git
+cd claude-subscription-usage-meter
 cp .env.example .env.local  # optional: add Supabase credentials
 npm install
 npm run dev

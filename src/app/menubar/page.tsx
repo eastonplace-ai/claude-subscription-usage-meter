@@ -115,6 +115,13 @@ export default function MenubarPage() {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [cost, setCost] = useState(0);
   const [topModel, setTopModel] = useState('');
+  const [settings, setSettings] = useState({
+    enabled: true,
+    showFiveHour: true,
+    showSevenDay: true,
+    showSonnet: true,
+    showCost: true,
+  });
   const [chartBuckets, setChartBuckets] = useState<ReturnType<typeof buildBuckets>>([]);
   const [lastRefresh, setLastRefresh] = useState('');
   const mountedRef = useRef(true);
@@ -159,6 +166,15 @@ export default function MenubarPage() {
       if (chartRes.ok) {
         const entries: AgentEntry[] = await chartRes.json();
         setChartBuckets(buildBuckets(entries));
+      }
+
+      try {
+        const settingsRes = await fetch('/api/menubar-settings');
+        if (settingsRes.ok && mountedRef.current) {
+          setSettings(await settingsRes.json());
+        }
+      } catch {
+        // ignore settings fetch failures
       }
 
       setLastRefresh(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -210,12 +226,22 @@ export default function MenubarPage() {
 
       {!data ? (
         <div style={{ color: t.faint, fontSize: 10, textAlign: 'center', padding: '30px 0' }}>Connecting...</div>
+      ) : !settings.enabled ? (
+        <div style={{ color: t.faint, fontSize: 10, textAlign: 'center', padding: '30px 0' }}>
+          Menu bar widget is disabled in settings.
+        </div>
       ) : (
         <>
           {/* Usage bars */}
-          <UsageBar label="5-Hour Window" pct={fiveHour} color={pctColor(fiveHour)} remaining={tb?.fiveHour?.remaining} t={t} />
-          <UsageBar label="7-Day Window" pct={sevenDay} color={pctColor(sevenDay)} remaining={tb?.sevenDay?.remaining} t={t} />
-          {overage > 0 && <UsageBar label="Sonnet Weekly" pct={overage} color={ACCENT.blue} remaining={tb?.sonnet?.remaining} t={t} />}
+          {settings.showFiveHour && (
+            <UsageBar label="5-Hour Window" pct={fiveHour} color={pctColor(fiveHour)} remaining={tb?.fiveHour?.remaining} t={t} />
+          )}
+          {settings.showSevenDay && (
+            <UsageBar label="7-Day Window" pct={sevenDay} color={pctColor(sevenDay)} remaining={tb?.sevenDay?.remaining} t={t} />
+          )}
+          {settings.showSonnet && overage > 0 && (
+            <UsageBar label="Sonnet Weekly" pct={overage} color={ACCENT.blue} remaining={tb?.sonnet?.remaining} t={t} />
+          )}
 
           {/* Separator */}
           <div style={{ borderTop: `1px solid ${t.border}`, margin: '4px 0 8px' }} />
@@ -230,11 +256,13 @@ export default function MenubarPage() {
 
           {/* Bottom row */}
           <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
-            <div style={{ flex: 1, backgroundColor: t.surface, border: `1px solid ${t.border}`, borderRadius: 6, padding: '6px 8px' }}>
-              <div style={{ color: t.faint, fontSize: 7, letterSpacing: '0.1em', marginBottom: 2 }}>TODAY</div>
-              <div style={{ color: ACCENT.amber, fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>${cost.toFixed(2)}</div>
-            </div>
-            <div style={{ flex: 1, backgroundColor: t.surface, border: `1px solid ${t.border}`, borderRadius: 6, padding: '6px 8px', overflow: 'hidden' }}>
+            {settings.showCost && (
+              <div style={{ flex: 1, backgroundColor: t.surface, border: `1px solid ${t.border}`, borderRadius: 6, padding: '6px 8px' }}>
+                <div style={{ color: t.faint, fontSize: 7, letterSpacing: '0.1em', marginBottom: 2 }}>TODAY</div>
+                <div style={{ color: ACCENT.amber, fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>${cost.toFixed(2)}</div>
+              </div>
+            )}
+            <div style={{ flex: settings.showCost ? 1 : 2, backgroundColor: t.surface, border: `1px solid ${t.border}`, borderRadius: 6, padding: '6px 8px', overflow: 'hidden' }}>
               <div style={{ color: t.faint, fontSize: 7, letterSpacing: '0.1em', marginBottom: 2 }}>TOP MODEL</div>
               <div style={{ color: ACCENT.blue, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{topModel || '—'}</div>
             </div>

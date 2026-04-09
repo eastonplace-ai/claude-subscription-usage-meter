@@ -2,13 +2,19 @@
   "name": "claude-usage-electron",
   "version": "0.1.0",
   "private": true,
+  "description": "Real-time Claude Code analytics dashboard with a macOS menu bar companion.",
+  "author": "Easton Place",
   "main": "electron-dist/main.js",
   "scripts": {
-    "dev": "concurrently \"next dev -p 3099\" \"wait-on http://localhost:3099 && electron .\"",
+    "dev": "node scripts/dev.mjs",
     "build:next": "next build",
     "build:electron": "tsc -p electron/tsconfig.json",
     "build": "npm run build:next && npm run build:electron && electron-builder --mac",
     "start": "electron .",
+    "typecheck": "tsc --noEmit",
+    "qa:smoke": "node scripts/qa-smoke.mjs",
+    "qa:smoke:missing": "CLAUDE_USAGE_DISABLE_ENV_FALLBACK=1 node scripts/qa-smoke.mjs --scenario missing-optional",
+    "qa:smoke:app-config": "CLAUDE_USAGE_DISABLE_ENV_FALLBACK=1 node scripts/qa-smoke.mjs --scenario app-config-only",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
