@@ -9,7 +9,7 @@
 <p align="center">
   <img alt="Platform: macOS" src="https://img.shields.io/badge/platform-macOS-111111?style=flat-square&logo=apple&logoColor=white">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white">
-  <img alt="Electron" src="https://img.shields.io/badge/Electron-28-47848F?style=flat-square&logo=electron&logoColor=white">
+  <img alt="Electron" src="https://img.shields.io/badge/Electron-33-47848F?style=flat-square&logo=electron&logoColor=white">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2F855A?style=flat-square">
 </p>
 
